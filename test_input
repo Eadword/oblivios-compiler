@@ -1,0 +1,4 @@
+#macro1   -34 ; This is a comment
+#macro2 23;more junk messages
+#macro3      AX ;doubt this is useful info
+#macro4 macro1; Can't think of more garbage than this...
