@@ -1,25 +1,30 @@
 #include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <regex>
+#include <string>
 
 #include "preprocessor.h"
 
 //https://www.emacswiki.org/emacs/RegularExpression
-inline std::string readData(char* filename) {
-    FILE* code_file = fopen(filename, "r");
-    if(code_file == nullptr) return "";
+inline std::vector<std::string> readLines(const std::string& filename) {
+    std::vector<std::string> lines;
+    std::ifstream code_file(filename);
+    if(!code_file) throw std::invalid_argument("Could not open file: " + filename);
 
-    fseek(code_file, 0, SEEK_END);
-    size_t file_size = ftell(code_file) * sizeof(char);
-    rewind(code_file);
+    std::string line;
+    while(std::getline(code_file, line)) {
+        lines.push_back(line);
+    }
 
-    char* buffer = (char*)malloc(file_size);
-    fread(buffer, 1, file_size, code_file);
-    fclose(code_file);
-    std::string data(buffer, file_size);
-    free(buffer);
-    data += '\n';
-    return data;
+    code_file.close();
+
+#ifdef DEBUG
+    for(auto&& i : lines)
+        std::cout << i << std::endl;
+#endif
+
+    return lines;
 }
 
 inline void removeComments(std::string& data) {
@@ -27,12 +32,19 @@ inline void removeComments(std::string& data) {
 }
 
 
-
 int main(int argc, char** argv) {
     if(argc < 2) return 1;
 
-    std::string data = readData(argv[1]);
-    removeComments(data);
-    Preprocessor::run(data);
+    str_vec origional_code, code; // Store the unmodified for error printouts
+    try {
+        origional_code = readLines(argv[1]);
+    } catch(std::invalid_argument e) {
+        std::cout << e.what() << std::endl;
+        return -1;
+    }
+    code = origional_code;
+
+    //removeComments(code);
+    //Preprocessor::run(data);
     return 0;
 }
