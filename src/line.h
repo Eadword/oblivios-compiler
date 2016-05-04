@@ -9,6 +9,8 @@ using std::string;
  *
  * It also store the line number, because as things progress, blank lines will be removed and so on, allowing
  * easier debugging down the road.
+ *
+ * A line num of 0 indicates that it was generated for compilation purposes.
  */
 struct Line {
     /// The original line number

@@ -24,6 +24,16 @@ inline void printLines(const line_vec& lines) {
 #endif
 }
 
+inline void printStrMap(const str_map& map) {
+#ifdef DEBUG
+    const static char seperator[] = "------------------------------------";
+    std::cout << seperator << std::endl;
+    for(auto&& i : map)
+        std::cout << i.first << ": " << i.second << std::endl;
+    std::cout << seperator << std::endl;
+#endif
+}
+
 inline void applyReplace(line_vec& lines, const std::regex& pattern) {
     for(Line& line : lines)
         line.cur = std::regex_replace(line.cur, pattern, "");

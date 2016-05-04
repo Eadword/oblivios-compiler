@@ -2,6 +2,7 @@
 
 #include "preprocessor.h"
 #include "patterns.h"
+#include "compiler_exception.h"
 
 inline line_vec readLines(const string& filename) {
     std::ifstream code_file(filename);
@@ -32,7 +33,12 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    //applyReplace(code, Patterns::comment);
-    //Preprocessor::run(data);
+    try {
+        applyReplace(code, Patterns::comment);
+        Preprocessor::run(code);
+    } catch(compiler_exception e) {
+        std::cout << e.what() << std::endl;
+        return -1;
+    }
     return 0;
 }

@@ -13,25 +13,27 @@ void Preprocessor::run(line_vec& lines) {
 str_map Preprocessor::getMacros(const line_vec& lines) {
 
     str_map macros;
-//    for(const Line& line : lines) {
-//        std::smatch line_match;
-//        if(std::regex_match(line.cur, line_match, Patterns::macro_line)) {
-//            std::smatch macro_match;
-//            if(std::regex_match(line_match.str(), macro_match, Patterns::macro)) {
-//
-//            }
-//            else {
-//                //throw compiler_exception("Invalid Macro", lines[cur], cur); //TODO: finish this, and have an error type and the actual instance of the error passed to the constructor instead of line number
-//            }
-//
-//        }
-//        //else continue (no match found)
-//    }
+    //for(const Line& line : lines) {
+    for(unsigned int cur_line = 0; cur_line < lines.size(); ++cur_line) {
+        const Line& line = lines[cur_line];
+        std::smatch line_match, macro_match;
 
-#ifdef DEBUG
-    for(auto i = macros.begin(); i != macros.end(); ++i)
-        std::cout << "Found macro: #" << i->first << ' ' << i->second << std::endl;
-#endif
+        //Attempt to match entire line to vague description, i.e. a line starting with a '#'
+        if(!std::regex_match(line.cur, line_match, Patterns::macro_line)) continue;
 
+        //We found line which should represent a macro; attempt to read...
+        string tmp = line_match[1];
+        if(!std::regex_match(tmp, macro_match, Patterns::macro))
+            throw compiler_exception("Invalid Macro", lines, cur_line);
+
+        //It is valid formatting, now verify the name is unique
+        if(macros.find(macro_match[1]) != macros.end())
+            throw identifier_exception("Non-unique Identifier", macro_match[1], lines, cur_line);
+
+        //All is good, at it to macro list
+        macros[macro_match[1]] = macro_match[2];
+    }
+
+    printStrMap(macros);
     return macros;
 }
