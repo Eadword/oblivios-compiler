@@ -1,32 +1,30 @@
-#include "preprocessor.h"
-#include "misc.h"
+#include <fstream>
 
-//https://www.emacswiki.org/emacs/RegularExpression
-inline str_vec readLines(const std::string& filename) {
-    str_vec lines;
+#include "preprocessor.h"
+#include "patterns.h"
+
+inline line_vec readLines(const string& filename) {
     std::ifstream code_file(filename);
     if(!code_file) throw std::invalid_argument("Could not open file: " + filename);
 
+    line_vec lines;
+    unsigned int line_num = 1;
     std::string line;
-    while(std::getline(code_file, line))
-        lines.push_back(line);
+
+    while(std::getline(code_file, line)) {
+        lines.push_back( Line(line_num++, line) );
+    }
 
     code_file.close();
     printLines(lines);
     return lines;
 }
 
-void removeComments(str_vec& lines) {
-    const std::regex comment(";.*");
-    applyReplace(lines, comment);
-    //printLines(lines);
-}
-
 
 int main(int argc, char** argv) {
     if(argc < 2) return 1;
 
-    str_vec code; // Store the unmodified for error printouts
+    line_vec code; // Store the unmodified for error printouts
     try {
         code = readLines(argv[1]);
     } catch(std::invalid_argument e) {
@@ -34,7 +32,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    removeComments(code);
+    //applyReplace(code, Patterns::comment);
     //Preprocessor::run(data);
     return 0;
 }
