@@ -39,6 +39,8 @@ inline void applyReplace(line_vec& lines, const std::regex& pattern, string new_
         line.cur = std::regex_replace(line.cur, pattern, new_val);
 }
 
+line_vec readFile(const string& filename);
+
 // Example of regex_iterator
 //    for(std::sregex_iterator i = std::sregex_iterator(data.begin(), data.end(), Patterns::macro_line); i != Patterns::iterator_end; ++i)  {
 //        string line = (*i)[1];
