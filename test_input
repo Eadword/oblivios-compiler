@@ -2,7 +2,7 @@
 
 #macro2 23;more junk messages
 ;this has some meaning...
-#macro3      AX ;doubt this is useful info
+ #macro3      AX ;doubt this is useful info
 #macro4 macro1; Can't think of more garbage than this...
 
 label:mov ax, macro1

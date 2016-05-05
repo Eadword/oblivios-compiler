@@ -19,7 +19,7 @@ inline void printLines(const line_vec& lines) {
     const static char seperator[] = "====================================";
     std::cout << seperator << std::endl;
     for(const Line& line: lines)
-        std::cout << line.num << "\t:" << line.cur << std::endl;
+        std::cout << line.num << ":\t" << line.cur << std::endl;
     std::cout << seperator << std::endl;
 #endif
 }

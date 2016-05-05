@@ -24,6 +24,7 @@ void Preprocessor::removeComments(line_vec &lines) {
 void Preprocessor::removeWhiteSpace(line_vec& lines) {
     applyReplace(lines, Patterns::white_space, " ");
     applyReplace(lines, Patterns::eol_white_space);
+    applyReplace(lines, Patterns::bol_white_space);
     for(auto i = lines.begin(); i != lines.end();) {
         if(i->cur.empty()) lines.erase(i);
         else ++i;
