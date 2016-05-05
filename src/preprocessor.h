@@ -9,4 +9,5 @@ namespace Preprocessor {
     void removeWhiteSpace(line_vec& lines);
     str_map getMacros(line_vec& lines);
     void replaceMacros(line_vec &lines, str_map &macros);
+    //TODO: recognize and evaluate expressions
 }

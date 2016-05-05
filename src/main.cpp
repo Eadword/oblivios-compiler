@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "preprocessor.h"
 #include "compiler.h"
 #include "compiler_exception.h"

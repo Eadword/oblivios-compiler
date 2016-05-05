@@ -1,4 +1,6 @@
 #include <fstream>
+#include <iostream>
+
 #include "misc.h"
 
 line_vec readFile(const string& filename) {
@@ -17,3 +19,26 @@ line_vec readFile(const string& filename) {
     printLines(lines);
     return lines;
 }
+
+void applyReplace(line_vec& lines, const std::regex& pattern, string new_val) {
+    for(Line& line : lines)
+        line.cur = std::regex_replace(line.cur, pattern, new_val);
+}
+
+#ifdef DEBUG
+void printLines(const line_vec& lines) {
+    const static char seperator[] = "====================================";
+    std::cout << seperator << std::endl;
+    for(const Line& line: lines)
+        std::cout << line.num << ":\t" << line.cur << std::endl;
+    std::cout << seperator << std::endl;
+}
+
+void printStrMap(const str_map& map) {
+    const static char seperator[] = "------------------------------------";
+    std::cout << seperator << std::endl;
+    for(auto&& i : map)
+        std::cout << i.first << ": " << i.second << std::endl;
+    std::cout << seperator << std::endl;
+}
+#endif

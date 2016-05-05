@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <regex>
 #include <string>
 #include <vector>
@@ -14,32 +13,18 @@ typedef std::vector<string> str_vec;
 typedef std::map<string, string> str_map;
 typedef std::vector<Line> line_vec;
 
-inline void printLines(const line_vec& lines) {
-#ifdef DEBUG
-    const static char seperator[] = "====================================";
-    std::cout << seperator << std::endl;
-    for(const Line& line: lines)
-        std::cout << line.num << ":\t" << line.cur << std::endl;
-    std::cout << seperator << std::endl;
-#endif
-}
-
-inline void printStrMap(const str_map& map) {
-#ifdef DEBUG
-    const static char seperator[] = "------------------------------------";
-    std::cout << seperator << std::endl;
-    for(auto&& i : map)
-        std::cout << i.first << ": " << i.second << std::endl;
-    std::cout << seperator << std::endl;
-#endif
-}
-
-inline void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "") {
-    for(Line& line : lines)
-        line.cur = std::regex_replace(line.cur, pattern, new_val);
-}
 
 line_vec readFile(const string& filename);
+void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "");
+
+
+#ifdef DEBUG
+void printStrMap(const str_map& map);
+void printLines(const line_vec& lines);
+#else
+#define printStrMap(var)
+#define printLines(var)
+#endif
 
 // Example of regex_iterator
 //    for(std::sregex_iterator i = std::sregex_iterator(data.begin(), data.end(), Patterns::macro_line); i != Patterns::iterator_end; ++i)  {

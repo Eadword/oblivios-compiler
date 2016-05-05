@@ -3,20 +3,31 @@
 namespace Patterns { // Eventually this could read from a config file
     using std::regex;
 
-    const regex comment(";.*");
-    const regex white_space("[ \\t\\v]+");
-    const regex afc_white_space(", ");
-    const regex eol_white_space(" $");
-    const regex bol_white_space("^ ");
-
+    // Generic
     inline regex findSting(std::string str) {
         return regex("\\b" + str + "\\b");
     }
 
-    /// Recognizes entire line macro
+
+    // Preprocessor
+    /// A comment starting at a ; and going to EOL
+    const regex comment(";.*");
+    /// Non-line-ending whitespace
+    const regex white_space("[ \\t\\v]+");
+    /// Spaces after a comma
+    const regex afc_white_space(", +");
+    /// Spaces at the end of a line
+    const regex eol_white_space(" +$");
+    /// Spaces leading in a line
+    const regex bol_white_space("^ +");
+
+    /// A line beginning with a '#'
     const regex macro_line("#(.*)");
-    /// Matches sub parts of the macro
+    /// A macro broken into identifier and replacement value; valid macro_lines must be matchable by a macro
     const regex macro("([A-Z_a-z]\\w*)[ ]+(.*)");
+
+    //TODO: expressions like 0x05 * (3d + 10o)
+
 
     /// The ending iterator
     const std::sregex_iterator iterator_end = std::sregex_iterator();
