@@ -34,9 +34,9 @@ inline void printStrMap(const str_map& map) {
 #endif
 }
 
-inline void applyReplace(line_vec& lines, const std::regex& pattern) {
+inline void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "") {
     for(Line& line : lines)
-        line.cur = std::regex_replace(line.cur, pattern, "");
+        line.cur = std::regex_replace(line.cur, pattern, new_val);
     printLines(lines);
 }
 

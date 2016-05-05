@@ -1,5 +1,9 @@
+#pragma  once
+
 namespace Patterns { // Eventually this could read from a config file
     const std::regex comment(";.*");
+    const std::regex white_space("[ \\t\\v]+");
+    const std::regex eol_white_space("[ \\t\\v]+$");
 
     /// Recognizes entire line macro
     const std::regex macro_line("#(.*)");

@@ -34,7 +34,6 @@ int main(int argc, char** argv) {
     }
 
     try {
-        applyReplace(code, Patterns::comment);
         Preprocessor::run(code);
     } catch(compiler_exception e) {
         std::cout << e.what() << std::endl;

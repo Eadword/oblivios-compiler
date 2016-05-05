@@ -6,6 +6,8 @@
 #include "compiler_exception.h"
 
 void Preprocessor::run(line_vec& lines) {
+    applyReplace(lines, Patterns::comment);
+    removeWhiteSpace(lines);
     str_map macros = getMacros(lines);
     //TODO: replace the instances of the macros which are found
 }
@@ -23,7 +25,7 @@ str_map Preprocessor::getMacros(const line_vec& lines) {
 
         //We found line which should represent a macro; attempt to read...
         string tmp = line_match[1];
-        if(!std::regex_match(tmp, macro_match, Patterns::macro))
+    if(!std::regex_match(tmp, macro_match, Patterns::macro))
             throw compiler_exception("Invalid Macro", lines, cur_line);
 
         //It is valid formatting, now verify the name is unique
@@ -36,4 +38,14 @@ str_map Preprocessor::getMacros(const line_vec& lines) {
 
     printStrMap(macros);
     return macros;
+}
+
+void Preprocessor::removeWhiteSpace(line_vec& lines) {
+    applyReplace(lines, Patterns::white_space, " ");
+    applyReplace(lines, Patterns::eol_white_space);
+    for(auto i = lines.begin(); i != lines.end();) {
+        if(i->cur.empty()) lines.erase(i);
+        else ++i;
+    }
+    printLines(lines);
 }
