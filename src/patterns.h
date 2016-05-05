@@ -1,19 +1,22 @@
 #pragma  once
 
 namespace Patterns { // Eventually this could read from a config file
-    const std::regex comment(";.*");
-    const std::regex white_space("[ \\t\\v]+");
-    const std::regex eol_white_space("[ \\t\\v]+$");
-    const std::regex bol_white_space("^[ \\t\\v]+");
+    using std::regex;
 
-    inline std::regex findSting(std::string str) {
-        return std::regex("\\b" + str + "\\b");
+    const regex comment(";.*");
+    const regex white_space("[ \\t\\v]+");
+    const regex afc_white_space(", ");
+    const regex eol_white_space(" $");
+    const regex bol_white_space("^ ");
+
+    inline regex findSting(std::string str) {
+        return regex("\\b" + str + "\\b");
     }
 
     /// Recognizes entire line macro
-    const std::regex macro_line("#(.*)");
+    const regex macro_line("#(.*)");
     /// Matches sub parts of the macro
-    const std::regex macro("([A-Z_a-z]\\w*)[ ]+(.*)");
+    const regex macro("([A-Z_a-z]\\w*)[ ]+(.*)");
 
     /// The ending iterator
     const std::sregex_iterator iterator_end = std::sregex_iterator();
