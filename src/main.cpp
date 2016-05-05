@@ -39,5 +39,6 @@ int main(int argc, char** argv) {
         std::cout << e.what() << std::endl;
         return -1;
     }
+    printLines(code);
     return 0;
 }

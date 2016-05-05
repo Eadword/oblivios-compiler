@@ -19,7 +19,7 @@ inline void printLines(const line_vec& lines) {
     const static char seperator[] = "====================================";
     std::cout << seperator << std::endl;
     for(const Line& line: lines)
-        std::cout << line.num << ":" << line.cur << std::endl;
+        std::cout << line.num << "\t:" << line.cur << std::endl;
     std::cout << seperator << std::endl;
 #endif
 }
@@ -37,7 +37,6 @@ inline void printStrMap(const str_map& map) {
 inline void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "") {
     for(Line& line : lines)
         line.cur = std::regex_replace(line.cur, pattern, new_val);
-    printLines(lines);
 }
 
 // Example of regex_iterator
