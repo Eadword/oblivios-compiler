@@ -12,6 +12,9 @@ void Preprocessor::run(line_vec& lines) {
     removeWhiteSpace(lines);
     for(Line& i : lines) boost::to_upper(i.cur);
 
+    //This error should never have to occur, but just in case someone tries to test the system...
+    if(lines.size() > 0xffff) throw compiler_exception("Code too long", lines, 0xffff);
+
     str_map macros = getMacros(lines);
     replaceMacros(lines, macros);
 }
@@ -34,9 +37,8 @@ void Preprocessor::removeWhiteSpace(line_vec& lines) {
 }
 
 str_map Preprocessor::getMacros(line_vec& lines) {
-
     str_map macros;
-    for(unsigned int cur_line = 0; cur_line < lines.size(); ++cur_line) {
+    for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
         const Line& line = lines[cur_line];
         std::smatch line_match, macro_match;
 
@@ -65,5 +67,15 @@ str_map Preprocessor::getMacros(line_vec& lines) {
 void Preprocessor::replaceMacros(line_vec &lines, str_map& macros) {
     for(auto&& i : macros)
         applyReplace(lines, Patterns::findSting(i.first), i.second);
+    printLines(lines);
+}
+
+std::map<string, uint16_t> getLabels(line_vec& lines) {
+    std::map<string, uint16_t> labels;
+    for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
+        const Line& line = lines[cur_line];
+        std::smatch label;
+    }
+
     printLines(lines);
 }

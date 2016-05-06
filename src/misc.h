@@ -11,7 +11,9 @@
 using std::string;
 typedef std::vector<string> str_vec;
 typedef std::map<string, string> str_map;
+typedef std::map<string, uint16_t> label_map;
 typedef std::vector<Line> line_vec;
+typedef std::vector<uint64_t> code_vec;
 
 
 line_vec readFile(const string& filename);
