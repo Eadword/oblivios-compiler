@@ -34,7 +34,15 @@ void printLines(const line_vec& lines) {
     std::cout << seperator << std::endl;
 }
 
-void printStrMap(const str_map& map) {
+void debugStrMap(const std::map<string, string>& map) {
+    const static char seperator[] = "------------------------------------";
+    std::cout << seperator << std::endl;
+    for(auto&& i : map)
+        std::cout << i.first << ": " << i.second << std::endl;
+    std::cout << seperator << std::endl;
+}
+
+void debugLabelMap(const std::map<string, uint16_t>& map) {
     const static char seperator[] = "------------------------------------";
     std::cout << seperator << std::endl;
     for(auto&& i : map)

@@ -14,8 +14,6 @@ namespace Patterns { // Eventually this could read from a config file
     const regex comment(";.*");
     /// Non-line-ending whitespace
     const regex white_space("[ \\t\\v]+");
-    /// Spaces after a comma
-    const regex afc_white_space(", +");
     /// Spaces at the end of a line
     const regex eol_white_space(" +$");
     /// Spaces leading in a line
@@ -25,6 +23,10 @@ namespace Patterns { // Eventually this could read from a config file
     const regex macro_line("#(.*)");
     /// A macro broken into identifier and replacement value; valid macro_lines must be matchable by a macro
     const regex macro("([A-Z_a-z]\\w*)[ ]+(.*)");
+    /// A line containing at least one ':'
+    //const regex label_line("(.*?):.*");
+    //const regex label("(?:^|:)([A-Z_a-z]\\w*)");
+    const regex label("([A-Z_a-z]\\w*):");
 
     //TODO: expressions like 0x05 * (3d + 10o)
 

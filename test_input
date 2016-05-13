@@ -5,6 +5,6 @@
  #macro3      AX ;doubt this is useful info
 #macro4 macro1; Can't think of more garbage than this...
 
-label:mov ax, macro1
+label:   mov ax, macro1
 add macro3, bx
 jmp label

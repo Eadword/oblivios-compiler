@@ -26,7 +26,11 @@ void Preprocessor::removeComments(line_vec &lines) {
 
 void Preprocessor::removeWhiteSpace(line_vec& lines) {
     applyReplace(lines, Patterns::white_space, " ");
-    applyReplace(lines, Patterns::afc_white_space, ",");
+
+    //This is regrettably inefficient, but lookbehinds not supported
+    applyReplace(lines, std::regex(", +"), ",");
+    applyReplace(lines, std::regex(": +"), ":");
+
     applyReplace(lines, Patterns::eol_white_space);
     applyReplace(lines, Patterns::bol_white_space);
     for(auto i = lines.begin(); i != lines.end();) {
@@ -40,26 +44,26 @@ str_map Preprocessor::getMacros(line_vec& lines) {
     str_map macros;
     for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
         const Line& line = lines[cur_line];
-        std::smatch line_match, macro_match;
+        std::smatch match;
 
         //Attempt to match entire line to vague description, i.e. a line starting with a '#'
-        if(!std::regex_match(line.cur, line_match, Patterns::macro_line)) continue;
+        if(!std::regex_match(line.cur, match, Patterns::macro_line)) continue;
 
         //We found line which should represent a macro; attempt to read...
-        string tmp = line_match[1];
-        if(!std::regex_match(tmp, macro_match, Patterns::macro))
+        string tmp = match[1];
+        if(!std::regex_match(tmp, match, Patterns::macro))
             throw compiler_exception("Invalid Macro", lines, cur_line);
 
         //It is valid formatting, now verify the name is unique
-        if(macros.find(macro_match[1]) != macros.end())
-            throw identifier_exception("Non-unique Identifier", macro_match[1], lines, cur_line);
+        if(macros.find(match[1]) != macros.end())
+            throw identifier_exception("Non-unique Identifier", match[1], lines, cur_line);
 
         //All is good, add it to macro list
-        macros[macro_match[1]] = macro_match[2];
+        macros[match[1]] = match[2];
         lines.erase(lines.begin() + cur_line--);
     }
 
-    printStrMap(macros);
+    debugStrMap(macros);
     printLines(lines);
     return macros;
 }
@@ -70,12 +74,38 @@ void Preprocessor::replaceMacros(line_vec &lines, str_map& macros) {
     printLines(lines);
 }
 
-std::map<string, uint16_t> getLabels(line_vec& lines) {
+std::map<string, uint16_t> Preprocessor::getLabels(line_vec& lines) {
     std::map<string, uint16_t> labels;
     for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
-        const Line& line = lines[cur_line];
-        std::smatch label;
+        Line& line = lines[cur_line];
+        std::smatch match;
+
+        //Find a line containing a ':'
+        //if(!std::regex_match(line.cur, match, Patterns::label_line)) continue;
+        bool found = false;
+        for(std::sregex_iterator i = std::sregex_iterator(line.cur.begin(), line.cur.end(), Patterns::label); i != Patterns::iterator_end; ++i) {
+            found = true;
+            string label = (*i)[1];
+            if(labels.find(label) != labels.end())
+                throw identifier_exception("Non-unique Identifier", label, lines, cur_line);
+
+            labels[label] = cur_line;
+        }
+
+        if(!found) continue;
+
+        string::iterator end_of_label = line.cur.begin();
+        for(uint16_t x = line.cur.size() - 1; x >= 0; --x) {
+            if(line.cur[x] == ':') {
+                end_of_label += x;
+                break;
+            }
+        }
+        line.cur.erase(line.cur.begin(), end_of_label);
+        if(line.cur.empty())
+            lines.erase(lines.begin() + cur_line);
     }
 
+    debugLabelMap(labels);
     printLines(lines);
 }

@@ -21,11 +21,13 @@ void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "
 
 
 #ifdef DEBUG
-void printStrMap(const str_map& map);
-void printLines(const line_vec& lines);
+void debugStrMap(const std::map<string, string>&);
+void debugLabelMap(const std::map<string, uint16_t>&);
+void printLines(const line_vec&);
 #else
-#define printStrMap(var)
-#define printLines(var)
+#define debugStrMap(var)
+#define debugLabelMap(var)
+#define debugVector(var)
 #endif
 
 // Example of regex_iterator
