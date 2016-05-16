@@ -29,8 +29,9 @@ void applyReplace(line_vec& lines, const std::regex& pattern, string new_val) {
 void printLines(const line_vec& lines) {
     const static char seperator[] = "====================================";
     std::cout << seperator << std::endl;
+    unsigned int cur_line = 0;
     for(const Line& line: lines)
-        std::cout << line.num << ":\t" << line.cur << std::endl;
+        printf("%3u|%3u: %s\n", cur_line++, line.num, line.cur.c_str());
     std::cout << seperator << std::endl;
 }
 

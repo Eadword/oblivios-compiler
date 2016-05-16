@@ -17,6 +17,7 @@ void Preprocessor::run(line_vec& lines) {
 
     str_map macros = getMacros(lines);
     replaceMacros(lines, macros);
+    std::map<std::string, uint16_t> labels = getLabels(lines);
 }
 
 void Preprocessor::removeComments(line_vec &lines) {
@@ -101,7 +102,7 @@ std::map<string, uint16_t> Preprocessor::getLabels(line_vec& lines) {
                 break;
             }
         }
-        line.cur.erase(line.cur.begin(), end_of_label);
+        line.cur.erase(line.cur.begin(), end_of_label + 1);
         if(line.cur.empty())
             lines.erase(lines.begin() + cur_line);
     }
