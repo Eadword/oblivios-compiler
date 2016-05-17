@@ -17,7 +17,8 @@ void Preprocessor::run(line_vec& lines) {
 
     str_map macros = getMacros(lines);
     replaceMacros(lines, macros);
-    std::map<std::string, uint16_t> labels = getLabels(lines);
+    label_map labels = getLabels(lines);
+    replaceLabels(lines, labels);
 }
 
 void Preprocessor::removeComments(line_vec &lines) {
@@ -69,13 +70,13 @@ str_map Preprocessor::getMacros(line_vec& lines) {
     return macros;
 }
 
-void Preprocessor::replaceMacros(line_vec &lines, str_map& macros) {
+void Preprocessor::replaceMacros(line_vec& lines, const str_map& macros) {
     for(auto&& i : macros)
         applyReplace(lines, Patterns::findSting(i.first), i.second);
     printLines(lines);
 }
 
-std::map<string, uint16_t> Preprocessor::getLabels(line_vec& lines) {
+label_map Preprocessor::getLabels(line_vec& lines) {
     std::map<string, uint16_t> labels;
     for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
         Line& line = lines[cur_line];
@@ -108,5 +109,22 @@ std::map<string, uint16_t> Preprocessor::getLabels(line_vec& lines) {
     }
 
     debugLabelMap(labels);
+    printLines(lines);
+}
+
+void Preprocessor::replaceLabels(line_vec& lines, const label_map& labels) {
+    for(auto&& label : labels) {
+        for(uint16_t x = 0; x < lines.size(); ++x) {
+            Line& line = lines[x];
+            std::string copy = line.cur;
+            auto pattern = Patterns::findSting(label.first);
+
+            // Use regex serach to find each instance and the the suffix from match_results for each next search
+            // basically reconstruct line with prefix + newval + suffix with each suffix being processed
+            //http://en.cppreference.com/w/cpp/regex/regex_search
+            // Then replace with the relative offset from the current location
+            
+        }
+    }
     printLines(lines);
 }
