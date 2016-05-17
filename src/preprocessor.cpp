@@ -77,20 +77,20 @@ void Preprocessor::replaceMacros(line_vec& lines, const str_map& macros) {
 }
 
 label_map Preprocessor::getLabels(line_vec& lines) {
-    std::map<string, uint16_t> labels;
+    label_map labels;
     for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
         Line& line = lines[cur_line];
         std::smatch match;
 
         //Find a line containing a ':'
-        //if(!std::regex_match(line.cur, match, Patterns::label_line)) continue;
         bool found = false;
         for(std::sregex_iterator i = std::sregex_iterator(line.cur.begin(), line.cur.end(), Patterns::label); i != Patterns::iterator_end; ++i) {
             found = true;
             string label = (*i)[1];
             if(labels.find(label) != labels.end())
                 throw identifier_exception("Non-unique Identifier", label, lines, cur_line);
-
+            if(cur_line >= lines.size() - 1)
+                throw compiler_exception("Label Refers to Nothing", lines, cur_line);
             labels[label] = cur_line;
         }
 
@@ -110,20 +110,17 @@ label_map Preprocessor::getLabels(line_vec& lines) {
 
     debugLabelMap(labels);
     printLines(lines);
+    return labels;
 }
 
 void Preprocessor::replaceLabels(line_vec& lines, const label_map& labels) {
     for(auto&& label : labels) {
-        for(uint16_t x = 0; x < lines.size(); ++x) {
-            Line& line = lines[x];
-            std::string copy = line.cur;
-            auto pattern = Patterns::findSting(label.first);
+        auto pattern = Patterns::findSting(label.first);
 
-            // Use regex serach to find each instance and the the suffix from match_results for each next search
-            // basically reconstruct line with prefix + newval + suffix with each suffix being processed
-            //http://en.cppreference.com/w/cpp/regex/regex_search
-            // Then replace with the relative offset from the current location
-            
+        for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
+            Line& line = lines[cur_line];
+            std::string replace = std::to_string((int)label.second - (int)cur_line);
+            line.cur = std::regex_replace(line.cur, pattern, replace);
         }
     }
     printLines(lines);
