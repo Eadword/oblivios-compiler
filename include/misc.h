@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "line.h"
+#include "instruction.h"
 
 #define DEBUG
 
