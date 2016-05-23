@@ -8,7 +8,7 @@ void Instruction::setOPCode(OPCode code) {
     data |= ((uint32_t)code) << 26;
 }
 
-uint8_t Instruction::getOPCode() {
+OPCode Instruction::getOPCode() {
     if(type == InstType::STORAGE)
         throw instruction_error("Cannot retrieve opcode from type storage");
 
@@ -21,7 +21,7 @@ uint8_t Instruction::getOPCode() {
 void Instruction::setDestMode(AccessMode mode) {
     if (type == InstType::STORAGE)
         throw instruction_error("Canot set destination access mode for type storage");
-    if(mode > 1)
+    if((uint8_t)mode > 1)
         throw instruction_error("Invalid destination access mode");
 
     data &= 0xFDFFFFFF; // 1111 1101 1111 1111 1111 1111 1111 1111
@@ -31,7 +31,7 @@ void Instruction::setDestMode(AccessMode mode) {
 void Instruction::setSrcMode(AccessMode mode) {
     if (type == InstType::STORAGE)
         throw instruction_error("Canot set source access mode for type storage");
-    if(mode > 1)
+    if((uint8_t)mode > 1)
         throw instruction_error("Invalid source access mode");
 
     data &= 0xFEFFFFFF; // 1111 1110 1111 1111 1111 1111 1111 1111
@@ -51,16 +51,16 @@ AccessMode Instruction::getSrcMode() {
 }
 
 
-uint8_t Instruction::dstSrcToBinary(Location dst, Location src) {
+uint8_t Instruction::routeToBinary(Location dst, Location src) {
     //Special region, cannot send larger register to smaller one, so we are able to
     // specially define these for more possibilities
-    if((dest <= Location::DH) && (src >= Location::AX) && (src <= Location::DX)) {
+    if((dst <= Location::DH) && (src >= Location::AX) && (src <= Location::DX)) {
         throw instruction_error("Invalid pairing, the destination cannot be smaller "
                                         "than the source");
     }
     if(src == Location::IP) {
         if(dst >= Location::AX && dst <= Location::DX)
-            return (dst << 1);
+            return ((uint8_t)dst << 1);
         //else, it is invalid
         throw instruction_error("IP can only be sent to the 16-bit registers");
     }
@@ -77,11 +77,12 @@ uint8_t Instruction::dstSrcToBinary(Location dst, Location src) {
 
 
     //Handle the normal cases
-    return (src << 4) + dst;
+    return ((uint8_t)src << 4) + (uint8_t)dst;
 }
 
-std::pair<Location, Location> Instruction::binaryToDstSrc(uint8_t binary) {
-    std::pair<Location, Location> dstsrc((binary & 0x0F), (binary >> 4));
+std::pair<Location, Location> Instruction::binaryToRoute(uint8_t binary) {
+    std::pair<Location, Location>
+            dstsrc((Location)(binary & 0x0F), (Location)(binary >> 4));
     Location& dst = dstsrc.first;
     Location& src = dstsrc.second;
 
@@ -90,7 +91,7 @@ std::pair<Location, Location> Instruction::binaryToDstSrc(uint8_t binary) {
         return dstsrc;
     }
     if((dst <= Location::DH) && (src >= Location::AX) && (src <= Location::DX)) {
-        if(dst == 0) {
+        if((uint8_t)dst == 0) {
             src = Location::IP;
             return dstsrc;
         }
@@ -98,9 +99,23 @@ std::pair<Location, Location> Instruction::binaryToDstSrc(uint8_t binary) {
             src = dst = Location::IMD;
             return dstsrc;
         }
-        throw instruction_error("Unrecognized special dst/src pair");
+        throw instruction_error("Unrecognized special routing value");
     }
 
     //Handle the normal case
     return dstsrc;
+}
+
+void Instruction::setRoute(Location dst, Location src) {
+    if(type == InstType::STORAGE)
+        throw instruction_error("Cannot set route for type storage");
+
+    uint32_t bin = routeToBinary(dst, src);
+    bin <<= 16;
+    data &= 0xFF00FFFF; //1111 1111 0000 0000 1111 1111 1111 1111
+    data |= bin;
+}
+
+std::pair<Location, Location> Instruction::getRoute() {
+    return binaryToRoute((uint8_t)((data << 8) >> 24));
 }

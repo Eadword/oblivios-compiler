@@ -1,12 +1,16 @@
 #pragma once
 
 #include <cstdint>
+#include <stdexcept>
+#include <cstdint>
+#include <string>
+#include <utility>
 
 struct instruction_error : public std::runtime_error {
     /**
      * @param error The error incurred, e.g. "Cannot retrieve opcode from type storage"
      */
-    instruction_error(string error) : std::runtime_error(error) {}
+    instruction_error(std::string error) : std::runtime_error(error) {}
 };
 
 enum class InstType : uint8_t { STORAGE, STANDARD, OFFSET };
@@ -53,11 +57,9 @@ struct Instruction {
     AccessMode getDestMode();
     AccessMode getSrcMode();
 
-    static uint8_t dstSrcToBinary(Location dst, Location src);
-    static std::pair<Location, Location> binaryToDstSrc(uint8_t binary);
+    static uint8_t routeToBinary(Location dst, Location src);
+    static std::pair<Location, Location> binaryToRoute(uint8_t binary);
 
-    void setDest(Location);
-    void setSrc(Location);
-    Location getDest();
-    Location getSrc();
+    void setRoute(Location dst, Location src);
+    std::pair<Location, Location> getRoute();
 };
