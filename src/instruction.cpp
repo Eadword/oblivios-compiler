@@ -1,7 +1,7 @@
 #include "instruction.h"
 
 void Instruction::setOPCode(OPCode code) {
-    if(type == InstType::STORAGE)
+    if(type == InsType::STORAGE)
         throw instruction_error("Cannot set opcode for type storage");
 
     data &= 0x03FFFFFF; // 0000 0011 1111 1111 1111 1111 1111 1111
@@ -9,7 +9,7 @@ void Instruction::setOPCode(OPCode code) {
 }
 
 OPCode Instruction::getOPCode() {
-    if(type == InstType::STORAGE)
+    if(type == InsType::STORAGE)
         throw instruction_error("Cannot retrieve opcode from type storage");
 
     //32bits, the first 6 are what we want, so shift right 26, and then convert to
@@ -19,7 +19,7 @@ OPCode Instruction::getOPCode() {
 
 
 void Instruction::setDestMode(AccessMode mode) {
-    if (type == InstType::STORAGE)
+    if (type == InsType::STORAGE)
         throw instruction_error("Canot set destination access mode for type storage");
     if((uint8_t)mode > 1)
         throw instruction_error("Invalid destination access mode");
@@ -29,7 +29,7 @@ void Instruction::setDestMode(AccessMode mode) {
 }
 
 void Instruction::setSrcMode(AccessMode mode) {
-    if (type == InstType::STORAGE)
+    if (type == InsType::STORAGE)
         throw instruction_error("Canot set source access mode for type storage");
     if((uint8_t)mode > 1)
         throw instruction_error("Invalid source access mode");
@@ -39,13 +39,13 @@ void Instruction::setSrcMode(AccessMode mode) {
 }
 
 AccessMode Instruction::getDestMode() {
-    if(type == InstType::STORAGE) throw instruction_error("Cannot retrieve destination access "
+    if(type == InsType::STORAGE) throw instruction_error("Cannot retrieve destination access "
                                                         "mode from type storage");
     return (AccessMode)((data << 6) >> 31);
 }
 
 AccessMode Instruction::getSrcMode() {
-    if(type == InstType::STORAGE) throw instruction_error("Cannot retrieve source access mode "
+    if(type == InsType::STORAGE) throw instruction_error("Cannot retrieve source access mode "
                                                         "from type storage");
     return (AccessMode)((data << 7) >> 31);
 }
@@ -107,7 +107,7 @@ std::pair<Location, Location> Instruction::binaryToRoute(uint8_t binary) {
 }
 
 void Instruction::setRoute(Location dst, Location src) {
-    if(type == InstType::STORAGE)
+    if(type == InsType::STORAGE)
         throw instruction_error("Cannot set route for type storage");
 
     uint32_t bin = routeToBinary(dst, src);
@@ -117,5 +117,32 @@ void Instruction::setRoute(Location dst, Location src) {
 }
 
 std::pair<Location, Location> Instruction::getRoute() {
+    if(type == InsType::STORAGE)
+        throw instruction_error("Cannot get route for type storage");
+
     return binaryToRoute((uint8_t)((data << 8) >> 24));
+}
+
+
+void Instruction::setImmediate(uint16_t val) {
+    if(type != InsType::IMMED)
+        throw instruction_error("Immediates must be stored in an Immediate type instruction");
+
+    data &= 0xFFFF0000;
+    data |= (uint32_t)val;
+}
+
+uint16_t Instruction::getImmediate() {
+    if(type != InsType::IMMED)
+        throw instruction_error("There is no immediate to retrieve");
+
+    return (uint16_t)data & 0x0000FFFF;
+}
+
+
+void Instruction::setOffsetDst(DstSrc dst) {
+    if(type != InsType::OFFSET)
+        throw instruction_error("Offsets are specific to offset type instructions");
+
+    data &= 0xFFFFEFFF //1111 1111 1111 1111 0111 1111 1111 1111
 }

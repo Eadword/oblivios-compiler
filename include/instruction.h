@@ -13,7 +13,7 @@ struct instruction_error : public std::runtime_error {
     instruction_error(std::string error) : std::runtime_error(error) {}
 };
 
-enum class InstType : uint8_t { STORAGE, STANDARD, OFFSET };
+enum class InsType : uint8_t { STORAGE, IMMED, OFFSET };
 enum class OPCode : uint8_t {
     INT,  MOVC, MOVW, MOVD,
     SWPC, SWPW, SWPD, ADD,
@@ -34,6 +34,7 @@ enum class Location : uint8_t {
     // Special Stuff
     IP, IMD
 };
+enum class DstSrc : uint8_t { DST = 0x00, SRC = 0x01 };
 
 
 /**
@@ -43,10 +44,10 @@ enum class Location : uint8_t {
  * @see the language guide for specifics
  */
 struct Instruction {
-    InstType type;
+    InsType type;
     uint32_t data;
 
-    Instruction(InstType type = InstType::STORAGE, uint32_t data = 0) :
+    Instruction(InsType type = InsType::STORAGE, uint32_t data = 0) :
             type(type), data(data) {}
 
     void setOPCode(OPCode);
@@ -62,4 +63,10 @@ struct Instruction {
 
     void setRoute(Location dst, Location src);
     std::pair<Location, Location> getRoute();
+
+    void setImmediate(uint16_t);
+    uint16_t getImmediate();
+
+    void setOffsetDst(DstSrc);
+    DstSrc getOffsetDst();
 };
