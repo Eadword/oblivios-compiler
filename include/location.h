@@ -16,7 +16,7 @@ inline std::string LocationToString(Location l) {
     return Location_Strings[(uint8_t)l];
 }
 
-inline Location LocationFromString(std::string l) {
+inline Location LocationFromString(const std::string& l) {
     auto loc = std::find(Location_Strings.begin(), Location_Strings.end(), l);
     if(loc == Location_Strings.end()) throw std::invalid_argument("Location " + l + " is not valid");
 
