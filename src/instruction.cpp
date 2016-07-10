@@ -136,7 +136,7 @@ uint16_t Instruction::getImmediate() {
     if(type != InsType::IMMED)
         throw instruction_error("There is no immediate to retrieve");
 
-    return (uint16_t)data & 0x0000FFFF;
+    return (uint16_t)((uint32_t)data & 0x0000FFFF);
 }
 
 
@@ -144,5 +144,28 @@ void Instruction::setOffsetDst(DstSrc dst) {
     if(type != InsType::OFFSET)
         throw instruction_error("Offsets are specific to offset type instructions");
 
-    data &= 0xFFFFEFFF //1111 1111 1111 1111 0111 1111 1111 1111
+    data &= 0xFFFFEFFF; //1111 1111 1111 1111 0111 1111 1111 1111
+    data |= ((uint32_t)(dst) << 16);
+}
+
+DstSrc Instruction::getOffsetDst() {
+    if(type != InsType::OFFSET)
+        throw instruction_error("There is no offset to retrieve");
+
+    return (DstSrc)((data << 16) >> 31);
+}
+
+
+void Instruction::setData(uint32_t d) {
+    if(type != InsType::STORAGE)
+        throw instruction_error("Data is specific to a storage type value");
+
+    data = d;
+}
+
+uint32_t Instruction::getData() {
+    if(type != InsType::STORAGE)
+        throw instruction_error("There is no data to retrive");
+
+    return data;
 }

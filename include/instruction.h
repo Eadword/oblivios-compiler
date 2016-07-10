@@ -41,6 +41,10 @@ enum class DstSrc : uint8_t { DST = 0x00, SRC = 0x01 };
  * This is a specialized bitset of 32bits which wraps it providing easy access to the
  * different stored parts like the opcode or access mode.
  *
+ * While many of the functions may not be necessary, they provide a level of security
+ * as they verify the data is of the right type, and keep the code together if there
+ * are changes to instruction representation.
+ *
  * @see the language guide for specifics
  */
 struct Instruction {
@@ -49,6 +53,7 @@ struct Instruction {
 
     Instruction(InsType type = InsType::STORAGE, uint32_t data = 0) :
             type(type), data(data) {}
+
 
     void setOPCode(OPCode);
     OPCode getOPCode();
@@ -69,4 +74,7 @@ struct Instruction {
 
     void setOffsetDst(DstSrc);
     DstSrc getOffsetDst();
+
+    void setData(uint32_t);
+    uint32_t getData();
 };
