@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <bitset>
 
 #include "misc.h"
 
@@ -26,12 +27,18 @@ void applyReplace(line_vec& lines, const std::regex& pattern, string new_val) {
 }
 
 #ifdef DEBUG
-void printLines(const line_vec& lines) {
+void printLines(const line_vec& lines, bool bin) {
     const static char seperator[] = "====================================";
     std::cout << seperator << std::endl;
     unsigned int cur_line = 0;
-    for(const Line& line: lines)
-        printf("%3u|%3u: %s\n", cur_line++, line.num, line.cur.c_str());
+    for(const Line& line: lines) {
+        if(!bin) printf("%3u|%3u: %s\n", cur_line++, line.num, line.cur.c_str());
+        else
+            printf("%3u|%3u: %-20s=> %01u %32s\n", cur_line++, line.num, line.cur.c_str(),
+                   (uint8_t)line.ins.type,
+                   std::bitset<32>(line.ins.data).to_string().c_str()
+            );
+    }
     std::cout << seperator << std::endl;
 }
 

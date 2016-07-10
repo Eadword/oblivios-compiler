@@ -1,5 +1,7 @@
 #pragma once
 
+#include "instruction.h"
+
 using std::string;
 
 /**
@@ -7,18 +9,23 @@ using std::string;
  * the line so if/when there is an error, the user knows what it is from, and does not have to decipher it
  * from the partially compiled line.
  *
- * It also store the line number, because as things progress, blank lines will be removed and so on, allowing
- * easier debugging down the road.
+ * It also store the line number, because as things progress, blank lines will be removed and so on,
+ * allowing easier debugging down the road.
  *
  * A line num of 0 indicates that it was generated for compilation purposes.
+ *
+ * Compiled instructions are stored in this to further help with debugging, by keeping everything
+ * together, makes it easy to see what lead to what and find mistakes.
  */
 struct Line {
-    /// The original line number
+    /// Original line number
     unsigned int num;
-    /// The original string representing the line
+    /// Original string representing the line
     string org;
-    /// The current string representing the line
+    /// Current string representing the line
     string cur;
+    /// Compiled instruction
+    Instruction ins;
 
     Line() {}
 

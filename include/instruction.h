@@ -1,10 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <stdexcept>
 #include <cstdint>
 #include <string>
 #include <utility>
+#include <vector>
 
 struct instruction_error : public std::runtime_error {
     /**
@@ -14,27 +16,11 @@ struct instruction_error : public std::runtime_error {
 };
 
 enum class InsType : uint8_t { STORAGE, IMMED, OFFSET };
-enum class OPCode : uint8_t {
-    INT,  MOVC, MOVW, MOVD,
-    SWPC, SWPW, SWPD, ADD,
-    SUB,  MUL,  IMUL, DIV,
-    IDIV, SHL,  SHR,  NEG,
-    NOT,  AND,  OR,   XOR,
-    INC,  DEC,  CMP,  JMP,
-    JG,   JGE,  JE,   JNE,
-    JL,   JLE,  JC,   JNC,
-    JO,   JNO
-};
 enum class AccessMode : uint8_t { DIRECT = 0, INDIRECT = 1 };
-enum class Location : uint8_t {
-    AL = 0x00, AH = 0x01, BL = 0x02, BH = 0x03,
-    CL = 0x04, CH = 0x05, DL = 0x06, DH = 0x07,
-    AX = 0x08, BX = 0x09, CX = 0x0A, DX = 0x0B,
-    IAX= 0x0C, IBX= 0x0D, ICX= 0x0E, IDX= 0x0F,
-    // Special Stuff
-    IP, IMD
-};
 enum class DstSrc : uint8_t { DST = 0x00, SRC = 0x01 };
+
+#include "opcode.h"
+#include "location.h"
 
 
 /**
