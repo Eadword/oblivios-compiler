@@ -1,4 +1,6 @@
+#include <regex>
 #include "instruction.h"
+#include "patterns.h"
 
 void Instruction::setOPCode(OPCode code) {
     if(type == InsType::STORAGE)
@@ -168,4 +170,34 @@ uint32_t Instruction::getData() {
         throw instruction_error("There is no data to retrive");
 
     return data;
+}
+
+
+bool Instruction::isImmediate(const std::string& arg) {
+    std::smatch match;
+    return std::regex_match(arg, match, Patterns::is_immed);
+}
+
+bool Instruction::isRegister(const std::string& arg) {
+    std::smatch match;
+    return std::regex_match(arg, match, Patterns::is_reg);
+}
+
+AccessMode Instruction::getMode(const std::string& arg) {
+    std::smatch match;
+    if(std::regex_match(arg, match, Patterns::is_relative))
+        return AccessMode::RELATIVE;
+
+    return AccessMode::DIRECT;
+}
+
+bool Instruction::isPointer(const std::string& arg) {
+    std::smatch match;
+    return std::regex_match(arg, match, Patterns::is_pointer);
+}
+
+bool Instruction::hasOffset(const std::string& arg) {
+    std::smatch match;
+    return std::regex_match(arg, match, Patterns::has_offset);
+
 }

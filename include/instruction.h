@@ -16,8 +16,8 @@ struct instruction_error : public std::runtime_error {
 };
 
 enum class InsType : uint8_t { STORAGE, IMMED, OFFSET };
-enum class AccessMode : uint8_t { DIRECT = 0, INDIRECT = 1 };
-enum class DstSrc : uint8_t { DST = 0x00, SRC = 0x01 };
+enum class AccessMode : uint8_t { DIRECT, RELATIVE };
+enum class DstSrc : uint8_t { DST, SRC };
 
 #include "opcode.h"
 #include "location.h"
@@ -63,4 +63,16 @@ struct Instruction {
 
     void setData(uint32_t);
     uint32_t getData();
+
+
+    static bool isImmediate(const std::string& arg);
+    static bool isRegister(const std::string& arg);
+
+    ///Can be relevant even if it is not a pointer, e.g. jmp
+    static AccessMode getMode(const std::string& arg);
+    ///Is it surrounded with []
+    static bool isPointer(const std::string& arg);
+
+    ///Does it have a '+' or '-' a num; only relevant if isRegister
+    static bool hasOffset(const std::string& arg);
 };
