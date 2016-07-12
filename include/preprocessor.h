@@ -11,5 +11,6 @@ namespace Preprocessor {
     void replaceMacros(line_vec& lines, const str_map& macros);
     label_map getLabels(line_vec& lines);
     void replaceLabels(line_vec& lines, const label_map& labels);
+    void formatNumbers(line_vec& lines);
     //TODO: recognize and evaluate expressions
 }

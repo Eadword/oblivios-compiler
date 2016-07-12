@@ -19,6 +19,7 @@ void Preprocessor::run(line_vec& lines) {
     replaceMacros(lines, macros);
     label_map labels = getLabels(lines);
     replaceLabels(lines, labels);
+    formatNumbers(lines);
 }
 
 void Preprocessor::removeComments(line_vec &lines) {
@@ -80,11 +81,12 @@ label_map Preprocessor::getLabels(line_vec& lines) {
     label_map labels;
     for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
         Line& line = lines[cur_line];
-        std::smatch match;
 
         //Find a line containing a ':'
         bool found = false;
-        for(std::sregex_iterator i = std::sregex_iterator(line.cur.begin(), line.cur.end(), Patterns::label); i != Patterns::iterator_end; ++i) {
+        for(std::sregex_iterator i = std::sregex_iterator(line.cur.begin(), line.cur.end(), Patterns::label);
+                i != Patterns::iterator_end; ++i)
+        {
             found = true;
             string label = (*i)[1];
             if(labels.find(label) != labels.end())
@@ -121,6 +123,92 @@ void Preprocessor::replaceLabels(line_vec& lines, const label_map& labels) {
             Line& line = lines[cur_line];
             std::string replace = std::to_string((int)label.second - (int)cur_line);
             line.cur = std::regex_replace(line.cur, pattern, replace);
+        }
+    }
+    printLines(lines);
+}
+
+
+void Preprocessor::formatNumbers(line_vec& lines) {
+    enum { BIN, OCT, DEC, HEX, NONE } num_type;
+
+    for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
+        Line& line = lines[cur_line];
+
+        //Find numbers
+        for(std::sregex_iterator i = std::sregex_iterator(line.cur.begin(), line.cur.end(), Patterns::loose_number);
+                i != Patterns::iterator_end; ++i)
+        {
+            auto& match = *i;
+            num_type = NONE;
+
+            //It is a decimal because it does not have 0X or BODH
+            if(match[2].str().empty() && match[4].str().empty()) {
+                //check if only 0-9
+                std::smatch check;
+                std::regex decimal("[0-9_]+");
+                std::string num = match[3].str();
+                if(!std::regex_match(num, check, decimal)) continue;
+                //don't throw since it does not have any markings as a number, just continue
+
+                //it is a (mostly) valid decimal, could just be underscores
+                num_type = DEC;
+            }
+
+            //It is invalid (hex 0x but an O for ending)
+            else if(!match[2].str().empty() && match[4].str() != "O")
+                throw compiler_exception("Cannot interpret number: " + match.str(), lines, cur_line);
+
+            //It is hex
+            else if(!match[2].str().empty() || match[4].str() == "H")
+                num_type = HEX;
+
+            //It is Binary
+            else if(match[4].str() == "B") {
+                std::smatch check;
+                std::regex non_dec("[A-F_]");
+                std::regex bin("[01_]+");
+                std::string num = match[3].str();
+                if(std::regex_match(num, check, non_dec)) continue; //catches words
+                if(!std::regex_match(num, check, bin));
+                    throw compiler_exception("Invalid binary: " + match.str(), lines, cur_line);
+
+                num_type = BIN;
+            }
+
+            //It is Octal
+            else if(match[4].str() == "O") {
+                std::smatch check;
+                std::regex non_dec("[A-F_]");
+                std::regex oct("[0-7_]+");
+                std::string num = match[3].str();
+                if(std::regex_match(num, check, non_dec)) continue; //catches words
+                if(!std::regex_match(num, check, oct))
+                    throw compiler_exception("Invalid octal: " + match.str(), lines, cur_line);
+
+                num_type = OCT;
+            }
+
+            //It is Decimal
+            else if(match[4].str() == "D") {
+                std::smatch check;
+                std::regex non_dec("[A-F_]+");
+                std::regex dec("[0-9_]");
+                std::string num = match[3].str();
+                if(std::regex_match(num, check, non_dec)) continue; //catches words
+                if(!std::regex_match(num, check, dec))
+                    throw compiler_exception("Invalid Decimal: " + match.str(), lines, cur_line);
+
+
+                num_type = DEC;
+            }
+
+            else {
+                throw compiler_exception("Odd Number Error with Value: " + match.str() +
+                                         ". Please file a bug report for this error.", lines, cur_line);
+            }
+
+            std::cout << "Number: " <<  match[0] << std::endl;
         }
     }
     printLines(lines);

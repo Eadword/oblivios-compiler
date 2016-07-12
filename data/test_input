@@ -6,8 +6,9 @@
 #macro4 macro1; Can't think of more garbage than this...
 
 label1:   movw ax, macro1
-datalbl:        DAT 0x00000000
+datalbl:        DAT 00000000h
 add macro3, bx
 movw bx, datalbl
 label2: label3:
 jmp label1
+
