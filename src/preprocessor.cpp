@@ -3,6 +3,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "numbers.h"
 #include "patterns.h"
 #include "preprocessor.h"
 #include "compiler_exception.h"
@@ -140,7 +141,6 @@ void Preprocessor::formatNumbers(line_vec& lines) {
                 i != Patterns::iterator_end; ++i)
         {
             auto& match = *i;
-            num_type = NONE;
 
             //It is a decimal because it does not have 0X or BODH
             if(match[2].str().empty() && match[4].str().empty()) {
@@ -170,7 +170,7 @@ void Preprocessor::formatNumbers(line_vec& lines) {
                 std::regex bin("[01_]+");
                 std::string num = match[3].str();
                 if(std::regex_match(num, check, non_dec)) continue; //catches words
-                if(!std::regex_match(num, check, bin));
+                if(!std::regex_match(num, check, bin))
                     throw compiler_exception("Invalid binary: " + match.str(), lines, cur_line);
 
                 num_type = BIN;
@@ -203,12 +203,34 @@ void Preprocessor::formatNumbers(line_vec& lines) {
                 num_type = DEC;
             }
 
-            else {
+            else { //This should never happen
                 throw compiler_exception("Odd Number Error with Value: " + match.str() +
                                          ". Please file a bug report for this error.", lines, cur_line);
             }
 
-            std::cout << "Number: " <<  match[0] << std::endl;
+
+            //Now we know what type it is, and have already moved on if it is not valid
+            // While it is true that it may read in a value just to reformat it as it was
+            // it is also cleaning it to put it in the same way, as HEX can be represented
+            // a few ways
+
+            //NOTE: Can't just convert to two's compliment as we don't know how large the
+            // final data size is, so preserve the +/- if it is there
+            uint64_t value = 0;
+            switch(num_type) {
+                case BIN: value = Numbers::readBin(match[3].str()); break;
+                case OCT: value = Numbers::readOct(match[3].str()); break;
+                case DEC: value = Numbers::readDec(match[3].str()); break;
+                case HEX:
+                    value = Numbers::readHex(
+                            (match[4].str() != "H") ?
+                            (match[3].str() + match[4].str()) :
+                            (match[3].str())
+                    );
+                    break;
+            }
+
+            std::cout << "Number: " << value << " \"" <<   match[0] << "\"" << std::endl;
         }
     }
     printLines(lines);
