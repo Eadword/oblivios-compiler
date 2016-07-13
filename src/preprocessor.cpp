@@ -1,5 +1,6 @@
-#include <regex>
 #include <iostream>
+#include <regex>
+#include <vector>
 
 #include <boost/algorithm/string.hpp>
 
@@ -136,11 +137,15 @@ void Preprocessor::formatNumbers(line_vec& lines) {
     for(uint16_t cur_line = 0; cur_line < lines.size(); ++cur_line) {
         Line& line = lines[cur_line];
 
+        //This is used to keep track of the change in start pos for each match
+        // after replacing the number with the new value
+        int offset = 0;
+
         //Find numbers
         for(std::sregex_iterator i = std::sregex_iterator(line.cur.begin(), line.cur.end(), Patterns::loose_number);
                 i != Patterns::iterator_end; ++i)
         {
-            auto& match = *i;
+            const std::smatch& match = *i;
 
             //It is a decimal because it does not have 0X or BODH
             if(match[2].str().empty() && match[4].str().empty()) {
@@ -232,15 +237,20 @@ void Preprocessor::formatNumbers(line_vec& lines) {
 
             std::string new_val = match[1].str() + std::to_string(value);
 
-#ifdef DEBUG
-            switch(num_type) {
-                case BIN: std::cout << "BIN "; break;
-                case OCT: std::cout << "OCT "; break;
-                case DEC: std::cout << "DEC "; break;
-                case HEX: std::cout << "HEX "; break;
-            }
-            std::cout << "Number: " << " \"" << match[0] << "\" => " << new_val << '\n';
-#endif
+            #ifdef DEBUG //Print some debug information
+                switch(num_type) {
+                    case BIN: std::cout << "BIN "; break;
+                    case OCT: std::cout << "OCT "; break;
+                    case DEC: std::cout << "DEC "; break;
+                    case HEX: std::cout << "HEX "; break;
+                }
+                std::cout << "Number: " << " \"" << match[0] << "\" => " << new_val << '\n';
+            #endif
+
+            //Repalce the value with the new one, and account for any offset due to
+            // previous replacements on the same line
+            line.cur.replace(match.position() + offset, match.length(), new_val);
+            offset += (new_val.length() - match.length());
         }
     }
     printLines(lines);
