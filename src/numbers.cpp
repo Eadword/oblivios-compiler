@@ -6,9 +6,10 @@
 inline std::string removeUscores(const std::string& input) {
     std::string clean = "";
 
-    for(const char& i : input) {
+    for(const char& i : input)
         if(i != '_') clean += i;
-    }
+    if(clean.empty()) clean = "0";
+    return clean;
 }
 
 #define READ_VAL(base) std::stoull(removeUscores(input), 0, base)

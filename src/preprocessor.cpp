@@ -156,7 +156,7 @@ void Preprocessor::formatNumbers(line_vec& lines) {
             }
 
             //It is invalid (hex 0x but an O for ending)
-            else if(!match[2].str().empty() && match[4].str() != "O")
+            else if(!match[2].str().empty() && match[4].str() == "O")
                 throw compiler_exception("Cannot interpret number: " + match.str(), lines, cur_line);
 
             //It is hex
@@ -230,7 +230,17 @@ void Preprocessor::formatNumbers(line_vec& lines) {
                     break;
             }
 
-            std::cout << "Number: " << value << " \"" <<   match[0] << "\"" << std::endl;
+            std::string new_val = match[1].str() + std::to_string(value);
+
+#ifdef DEBUG
+            switch(num_type) {
+                case BIN: std::cout << "BIN "; break;
+                case OCT: std::cout << "OCT "; break;
+                case DEC: std::cout << "DEC "; break;
+                case HEX: std::cout << "HEX "; break;
+            }
+            std::cout << "Number: " << " \"" << match[0] << "\" => " << new_val << '\n';
+#endif
         }
     }
     printLines(lines);
