@@ -33,6 +33,7 @@ namespace Patterns { // Eventually this could read from a config file
 
 
     //TODO: expressions like 0x05 * (3d + 10o)
+    //TODO: negatives with ops, e.g. "+-" -> "-" and "--" -> "+"
 
 
     // Compiler
@@ -43,11 +44,11 @@ namespace Patterns { // Eventually this could read from a config file
 
     // Arguments
     ///A semi-loose description of an immediate
-    const regex is_immed("%?-?[0-9A-F]*?[BODH]");
-    const regex is_reg("%?\\[?[A-Z]+\\]?([+-][0-9A-F]*?[BODH])?");
+    const regex is_immed("%?[+-]?\\d+");
+    const regex is_reg("%?\\[?[A-Z]+\\]?([+-]\\d+)?");
     const regex is_relative("%.*");
-    const regex is_pointer("%?\\[[A-Z]+\\]([+-][0-9A-F]*?[BODH])?");
-    const regex has_offset("%?\\[?[A-Z]+\\]?[+-][0-9A-F]*?[BODH]");
+    const regex is_pointer("%?\\[[A-Z]+\\]([+-]\\d+)?");
+    const regex has_offset("%?\\[?[A-Z]+\\]?[+-]\\d+");
 
     /// The ending iterator
     const std::sregex_iterator iterator_end = std::sregex_iterator();
