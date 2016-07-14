@@ -65,8 +65,7 @@ struct Instruction {
     uint32_t getData();
 
 
-    static bool isImmediate(const std::string& arg);
-    static bool isRegister(const std::string& arg);
+    static Location getLocation(const std::string& arg);
 
     ///Can be relevant even if it is not a pointer, e.g. jmp
     static AccessMode getMode(const std::string& arg);

@@ -43,9 +43,7 @@ namespace Patterns { // Eventually this could read from a config file
 
 
     // Arguments
-    ///A semi-loose description of an immediate
-    const regex is_immed("%?[+-]?\\d+");
-    const regex is_reg("%?\\[?[A-Z]+\\]?([+-]\\d+)?");
+    const regex get_location("%?\\[?(-?[A-Z0-9]+)\\]?([+-][0-9]+)?");
     const regex is_relative("%.*");
     const regex is_pointer("%?\\[[A-Z]+\\]([+-]\\d+)?");
     const regex has_offset("%?\\[?[A-Z]+\\]?[+-]\\d+");

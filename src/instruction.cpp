@@ -167,20 +167,38 @@ void Instruction::setData(uint32_t d) {
 
 uint32_t Instruction::getData() {
     if(type != InsType::STORAGE)
-        throw instruction_error("There is no data to retrive");
+        throw instruction_error("There is no data to retrieve");
 
     return data;
 }
 
 
-bool Instruction::isImmediate(const std::string& arg) {
+Location Instruction::getLocation(const std::string& arg) {
     std::smatch match;
-    return std::regex_match(arg, match, Patterns::is_immed);
-}
+    if(!std::regex_match(arg, match, Patterns::get_location))
+        throw instruction_error("Cannot interpret registry/immediate value " + arg);
 
-bool Instruction::isRegister(const std::string& arg) {
-    std::smatch match;
-    return std::regex_match(arg, match, Patterns::is_reg);
+    Location loc = Location::IMD;
+
+    bool check = false;
+    try { //assume it is a valid register
+         loc = LocationFromString(match[1]);
+    } catch(std::invalid_argument e) {
+        check = true; //need to check if valid immediate instead
+    }
+
+    if(check) {
+        std::smatch match2;
+        const std::string& tmp = match[1];
+        const std::regex number("([-+]?\\d+)");
+        if(std::regex_match(tmp, match2, number))
+            loc = Location::IMD;
+        else throw instruction_error("Invalid argument " + arg);
+    }
+    else if(loc == Location::IMD)
+        throw instruction_error("IMD is not a valid register");
+
+    return loc;
 }
 
 AccessMode Instruction::getMode(const std::string& arg) {
