@@ -15,7 +15,7 @@ struct instruction_error : public std::runtime_error {
     instruction_error(std::string error) : std::runtime_error(error) {}
 };
 
-enum class InsType : uint8_t { STORAGE, IMMED, OFFSET };
+enum class InsType : uint8_t { DAT, OP };
 enum class AccessMode : uint8_t { DIRECT, RELATIVE };
 enum class DstSrc : uint8_t { DST, SRC };
 
@@ -35,10 +35,14 @@ enum class DstSrc : uint8_t { DST, SRC };
  */
 struct Instruction {
     InsType type;
-    uint32_t data;
+    uint16_t data;
+
+    uint16_t imd_dst; //A ptr would take more space, so just store immediate
+    uint16_t imd_src; // value regardless of whether it is needed or not
+
 
     Instruction(InsType type = InsType::STORAGE, uint32_t data = 0) :
-            type(type), data(data) {}
+            type(type), data(data), dst_imd(0), src_imd(0) {}
 
 
     void setOPCode(OPCode);
@@ -49,29 +53,22 @@ struct Instruction {
     AccessMode getDestMode();
     AccessMode getSrcMode();
 
-    static uint8_t routeToBinary(Location dst, Location src);
-    static std::pair<Location, Location> binaryToRoute(uint8_t binary);
-
     void setRoute(Location dst, Location src);
     std::pair<Location, Location> getRoute();
 
-    void setImmediate(uint16_t);
-    uint16_t getImmediate();
-
-    void setOffsetDst(DstSrc);
-    DstSrc getOffsetDst();
-
-    void setData(uint32_t);
-    uint32_t getData();
+    void setData(uint16_t);
 
 
+    static uint8_t routeToBinary(Location dst, Location src);
+    static std::pair<Location, Location> binaryToRoute(uint8_t binary);
+
+    /**
+     * If the destination turns out to be an immediate and source is empty
+     * it is RIMD. If the src is not empty but the dst is an IMD, it
+     * is invalid.
+     */
     static Location getLocation(const std::string& arg);
 
     ///Can be relevant even if it is not a pointer, e.g. jmp
     static AccessMode getMode(const std::string& arg);
-    ///Is it surrounded with []
-    static bool isPointer(const std::string& arg);
-
-    ///Does it have a '+' or '-' a num; only relevant if isRegister
-    static bool hasOffset(const std::string& arg);
 };

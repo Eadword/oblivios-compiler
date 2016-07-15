@@ -7,6 +7,7 @@ enum class Location : uint8_t {
     #undef X
 };
 
+//TODO: convert to map?
 const std::vector<std::string> Location_Strings {
     #define X(name, str, dstval, srcval) str
     #include "locations"
@@ -26,7 +27,17 @@ inline std::string LocationToString(Location l) {
 inline Location LocationFromString(const std::string& l) {
     if(l.empty()) return Location::NONE;
     auto loc = std::find(Location_Strings.begin(), Location_Strings.end(), l);
-    if(loc == Location_Strings.end()) throw std::invalid_argument("Location " + l + " is not valid");
 
-    return (Location)(loc - Location_Strings.begin());
+    if(loc != Location_Strings.end())
+        return (Location)(loc - Location_Strings.begin());
+
+    std::smatch match;
+    const std::regex imd("(-?\\d+)");
+    const std::regex pimd("(\\[-?\\d+\\])");
+    if(std::regex_match(arg, match, imd))
+        return Location::IMD;
+    else if(std::regex_match(arg, match, pimd))
+        return Location::PIMD;
+
+    throw std::invalid_argument("Location " + l + " is not valid");
 }

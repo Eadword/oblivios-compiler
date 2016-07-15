@@ -34,9 +34,11 @@ void printLines(const line_vec& lines, bool bin) {
     for(const Line& line: lines) {
         if(!bin) printf("%3u|%3u: %s\n", cur_line++, line.num, line.cur.c_str());
         else
-            printf("%3u|%3u: %-20s=> %01u %32s\n", cur_line++, line.num, line.cur.c_str(),
+            printf("%3u|%3u: %-20s=> %01u %16s, %16s, %16s\n", cur_line++, line.num, line.cur.c_str(),
                    (uint8_t)line.ins.type,
-                   std::bitset<32>(line.ins.data).to_string().c_str()
+                   std::bitset<16>(line.ins.data).to_string().c_str(),
+                   std::bitset<16>(line.ins.imd_dst).to_string().c_str(),
+                   std::bitset<16>(line.ins.imd_src).to_string().c_str()
             );
     }
     std::cout << seperator << std::endl;

@@ -3,173 +3,133 @@
 #include "patterns.h"
 
 void Instruction::setOPCode(OPCode code) {
-    if(type == InsType::STORAGE)
-        throw instruction_error("Cannot set opcode for type storage");
+    if(type == InsType::DAT)
+        throw instruction_error("Cannot set opcode for DAT type");
 
-    data &= 0x03FFFFFF; // 0000 0011 1111 1111 1111 1111 1111 1111
-    data |= ((uint32_t)code) << 26;
+    data &= 0x03FF; // 0000 0011 1111 1111
+    data |= ((uint16_t)code) << 10;
 }
 
 OPCode Instruction::getOPCode() {
-    if(type == InsType::STORAGE)
-        throw instruction_error("Cannot retrieve opcode from type storage");
+    if(type == InsType::DAT)
+        throw instruction_error("Cannot retrieve opcode from DAT type");
 
-    //32bits, the first 6 are what we want, so shift right 26, and then convert to
+    //16bits, the first 6 are what we want, so shift right 10, and then convert to
     //an unsigned value and cast to uint8_t
-    return (OPCode)(data >> 26);
+    return (OPCode)(data >> 10);
 }
 
 
 void Instruction::setDestMode(AccessMode mode) {
-    if (type == InsType::STORAGE)
-        throw instruction_error("Canot set destination access mode for type storage");
+    if (type == InsType::DAT)
+        throw instruction_error("Canot set destination access mode for DAT type");
     if((uint8_t)mode > 1)
         throw instruction_error("Invalid destination access mode");
 
-    data &= 0xFDFFFFFF; // 1111 1101 1111 1111 1111 1111 1111 1111
-    data |= ((uint32_t)mode) << 25;
+    data &= 0xFDFF; // 1111 1101 1111 1111
+    data |= ((uint16_t)mode) << 9;
 }
 
 void Instruction::setSrcMode(AccessMode mode) {
-    if (type == InsType::STORAGE)
-        throw instruction_error("Canot set source access mode for type storage");
+    if (type == InsType::DAT)
+        throw instruction_error("Canot set source access mode for DAT type");
     if((uint8_t)mode > 1)
         throw instruction_error("Invalid source access mode");
 
-    data &= 0xFEFFFFFF; // 1111 1110 1111 1111 1111 1111 1111 1111
-    data |= ((uint32_t)mode) << 24;
+    data &= 0xFEFF; // 1111 1110 1111 1111
+    data |= ((uint16_t)mode) << 8;
 }
 
 AccessMode Instruction::getDestMode() {
-    if(type == InsType::STORAGE) throw instruction_error("Cannot retrieve destination access "
-                                                        "mode from type storage");
-    return (AccessMode)((data << 6) >> 31);
+    if(type == InsType::DAT)
+        throw instruction_error("Cannot retrieve destination access mode from DAT type");
+
+    return (AccessMode)((data & 0x0200) >> 9);
 }
 
 AccessMode Instruction::getSrcMode() {
-    if(type == InsType::STORAGE) throw instruction_error("Cannot retrieve source access mode "
-                                                        "from type storage");
-    return (AccessMode)((data << 7) >> 31);
+    if(type == InsType::DAT)
+        throw instruction_error("Cannot retrieve source access mode from type DAT type");
+
+    return (AccessMode)((data & 0x0100) >> 8);
 }
 
-
-uint8_t Instruction::routeToBinary(Location dst, Location src) {
-    //Special region, cannot send larger register to smaller one, so we are able to
-    // specially define these for more possibilities
-    if((dst <= Location::DH) && (src >= Location::AX) && (src <= Location::DX)) {
-        throw instruction_error("Invalid pairing, the destination cannot be smaller "
-                                        "than the source");
-    }
-    if(src == Location::IP) {
-        if(dst >= Location::AX && dst <= Location::DX)
-            return ((uint8_t)dst << 1);
-        //else, it is invalid
-        throw instruction_error("IP can only be sent to the 16-bit registers");
-    }
-    if(dst == Location::IMD) {
-        if(src == Location::IMD) return 0x81;
-        throw instruction_error("Destination cannot be an immediate");
-    }
-
-
-    //We have handled special cases, so clamp to AL through IDX
-    if(dst > Location::IDX) throw instruction_error("Invalid destination");
-    if(src == Location::IMD) src = dst; // When src==dst, then load immediate to location
-    if(src > Location::IDX) throw instruction_error("Invalid source");
-
-
-    //Handle the normal cases
-    return ((uint8_t)src << 4) + (uint8_t)dst;
-}
-
-std::pair<Location, Location> Instruction::binaryToRoute(uint8_t binary) {
-    std::pair<Location, Location>
-            dstsrc((Location)(binary & 0x0F), (Location)(binary >> 4));
-    Location& dst = dstsrc.first;
-    Location& src = dstsrc.second;
-
-    if(dst == src) {
-        src = Location::IMD;
-        return dstsrc;
-    }
-    if((dst <= Location::DH) && (src >= Location::AX) && (src <= Location::DX)) {
-        if((uint8_t)dst == 0) {
-            src = Location::IP;
-            return dstsrc;
-        }
-        if(binary == 0x81) {
-            src = dst = Location::IMD;
-            return dstsrc;
-        }
-        throw instruction_error("Unrecognized special routing value");
-    }
-
-    //Handle the normal case
-    return dstsrc;
-}
 
 void Instruction::setRoute(Location dst, Location src) {
-    if(type == InsType::STORAGE)
-        throw instruction_error("Cannot set route for type storage");
+    if(type == InsType::DAT)
+        throw instruction_error("Cannot set route for DAT type");
 
-    uint32_t bin = routeToBinary(dst, src);
-    bin <<= 16;
-    data &= 0xFF00FFFF; //1111 1111 0000 0000 1111 1111 1111 1111
-    data |= bin;
+    data &= 0xFF00; //1111 1111 0000 0000
+    data |= (uint16_t)routeToBinary(dst, src);
 }
 
 std::pair<Location, Location> Instruction::getRoute() {
-    if(type == InsType::STORAGE)
-        throw instruction_error("Cannot get route for type storage");
+    if(type == InsType::DAT)
+        throw instruction_error("Cannot get route for DAT type");
 
-    return binaryToRoute((uint8_t)((data << 8) >> 24));
+    return binaryToRoute((uint8_t)(data & 0x00FF));
 }
 
 
-void Instruction::setImmediate(uint16_t val) {
-    if(type != InsType::IMMED)
-        throw instruction_error("Immediates must be stored in an Immediate type instruction");
-
-    data &= 0xFFFF0000;
-    data |= (uint32_t)val;
-}
-
-uint16_t Instruction::getImmediate() {
-    if(type != InsType::IMMED)
-        throw instruction_error("There is no immediate to retrieve");
-
-    return (uint16_t)((uint32_t)data & 0x0000FFFF);
-}
-
-
-void Instruction::setOffsetDst(DstSrc dst) {
-    if(type != InsType::OFFSET)
-        throw instruction_error("Offsets are specific to offset type instructions");
-
-    data &= 0xFFFFEFFF; //1111 1111 1111 1111 0111 1111 1111 1111
-    data |= ((uint32_t)(dst) << 16);
-}
-
-DstSrc Instruction::getOffsetDst() {
-    if(type != InsType::OFFSET)
-        throw instruction_error("There is no offset to retrieve");
-
-    return (DstSrc)((data << 16) >> 31);
-}
-
-
-void Instruction::setData(uint32_t d) {
-    if(type != InsType::STORAGE)
-        throw instruction_error("Data is specific to a storage type value");
+void Instruction::setData(uint16_t d) {
+    if(type != InsType::DAT)
+        throw instruction_error("Data is specific to a DAT type value");
 
     data = d;
 }
 
-uint32_t Instruction::getData() {
-    if(type != InsType::STORAGE)
-        throw instruction_error("There is no data to retrieve");
 
-    return data;
+
+uint8_t Instruction::routeToBinary(Location dst, Location src) {
+    int8_t dstv = Location_Vals.at(dst).first;
+    int8_t srcv = Location_Vals.at(src).second;
+    if(dstv < -1) throw instruction_error("Invalid destination argument");
+    if(srcv < -1) throw instruction_error("Invalid source argument");
+
+    uint8_t route = 0x00;
+    if(dstv == -1) { //special cases
+        if(dst == Location::RIMD) {
+            route = 0xFF;
+            srcv = -2;
+        }
+    }
+    else route |= (uint8_t)dstv;
+
+    if(srcv == -1) { //special cases
+        //NONE is currently the only thing that qualifies
+        // so leave src as 0 since it does not matter
+    }
+    else if(srcv == -2) {/* D o  n o t h i n g*/}
+    else route |= ((uint8_t)srcv) << 4;
+
+    return route;
+}
+
+std::pair<Location, Location> Instruction::binaryToRoute(uint8_t binary) {
+    std::pair<Location, Location> dstsrc(Location::NONE, Location::NONE);
+    Location& dst = dstsrc.first;
+    Location& src = dstsrc.second;
+
+    //Special cases
+    if(binary == 0xFF) {
+        dst = Location::RIMD;
+        src = Location::NONE;
+        return dstsrc;
+    }
+
+    //Normal case
+    int8_t dstv = (int8_t)(binary & 0x0F);
+    int8_t srcv = (int8_t)(binary >> 4);
+
+    //Find the destination and source, invalid if not found
+    for(const auto& loc : Location_Vals) {
+        if(loc.second.first  == dstv) dst = loc.first;
+        if(loc.second.second == srcv) src = loc.first;
+    }
+    if(dst == Location::NONE && src == Location::NONE)
+        throw instruction_error("Invalid route " + std::bitset<8>(binary).to_string());
+
+    return dstsrc;
 }
 
 
@@ -178,25 +138,12 @@ Location Instruction::getLocation(const std::string& arg) {
     if(!std::regex_match(arg, match, Patterns::get_location))
         throw instruction_error("Cannot interpret registry/immediate value " + arg);
 
-    Location loc = Location::IMD;
-
-    bool check = false;
-    try { //assume it is a valid register
+    Location loc;
+    try {
          loc = LocationFromString(match[1]);
     } catch(std::invalid_argument e) {
-        check = true; //need to check if valid immediate instead
+        throw instruction_error(e.what());
     }
-
-    if(check) {
-        std::smatch match2;
-        const std::string& tmp = match[1];
-        const std::regex number("([-+]?\\d+)");
-        if(std::regex_match(tmp, match2, number))
-            loc = Location::IMD;
-        else throw instruction_error("Invalid argument " + arg);
-    }
-    else if(loc == Location::IMD)
-        throw instruction_error("IMD is not a valid register");
 
     return loc;
 }
@@ -207,15 +154,4 @@ AccessMode Instruction::getMode(const std::string& arg) {
         return AccessMode::RELATIVE;
 
     return AccessMode::DIRECT;
-}
-
-bool Instruction::isPointer(const std::string& arg) {
-    std::smatch match;
-    return std::regex_match(arg, match, Patterns::is_pointer);
-}
-
-bool Instruction::hasOffset(const std::string& arg) {
-    std::smatch match;
-    return std::regex_match(arg, match, Patterns::has_offset);
-
 }

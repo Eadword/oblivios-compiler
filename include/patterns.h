@@ -29,7 +29,7 @@ namespace Patterns { // Eventually this could read from a config file
     const regex label("([A-Z_a-z]\\w*):");
 
     ///Loose definition of a number
-    const regex loose_number("([+-]?)(0X)?([0-9A-F_]+?)([BODH])?\\b");
+    const regex loose_number("(-?)(0X)?([0-9A-F_]+?)([BODH])?\\b");
 
 
     //TODO: expressions like 0x05 * (3d + 10o)
@@ -39,14 +39,12 @@ namespace Patterns { // Eventually this could read from a config file
     // Compiler
     const regex opcode("([A-Z]+) ?(.*)");
     const regex onearg("([0-9A-Z\\[\\]%+\\-]+)");
-    const regex twoarg("([0-9A-Z\\[\\]%+\\-]+),([0-9A-Z\\[\\]%+\\-]+)");
+    const regex twoarg("([0-9A-Z\\[\\]%\\-]+),([0-9A-Z\\[\\]%\\-]+)");
 
 
     // Arguments
-    const regex get_location("%?\\[?(-?[A-Z0-9]+)\\]?([+-][0-9]+)?");
+    const regex get_location("%?(\\[?-?[A-Z0-9]+\\])");
     const regex is_relative("%.*");
-    const regex is_pointer("%?\\[[A-Z]+\\]([+-]\\d+)?");
-    const regex has_offset("%?\\[?[A-Z]+\\]?[+-]\\d+");
 
     /// The ending iterator
     const std::sregex_iterator iterator_end = std::sregex_iterator();
