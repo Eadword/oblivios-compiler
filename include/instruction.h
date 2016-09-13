@@ -41,8 +41,8 @@ struct Instruction {
     uint16_t imd_src; // value regardless of whether it is needed or not
 
 
-    Instruction(InsType type = InsType::STORAGE, uint32_t data = 0) :
-            type(type), data(data), dst_imd(0), src_imd(0) {}
+    Instruction(InsType type = InsType::DAT, uint32_t data = 0) :
+            type(type), data(data), imd_dst(0), imd_src(0) {}
 
 
     void setOPCode(OPCode);

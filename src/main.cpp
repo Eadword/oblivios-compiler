@@ -4,7 +4,7 @@
 #include "compiler.h"
 #include "compiler_exception.h"
 
-int main(int argc, char** argv) {
+/*int main(int argc, char** argv) {
     if(argc < 2) return 1;
 
     line_vec lines; // Store the unmodified for error printouts
@@ -29,4 +29,4 @@ int main(int argc, char** argv) {
         return -1;
     }
     return 0;
-}
+}*/

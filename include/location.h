@@ -34,9 +34,9 @@ inline Location LocationFromString(const std::string& l) {
     std::smatch match;
     const std::regex imd("(-?\\d+)");
     const std::regex pimd("(\\[-?\\d+\\])");
-    if(std::regex_match(arg, match, imd))
+    if(std::regex_match(l, match, imd))
         return Location::IMD;
-    else if(std::regex_match(arg, match, pimd))
+    else if(std::regex_match(l, match, pimd))
         return Location::PIMD;
 
     throw std::invalid_argument("Location " + l + " is not valid");
