@@ -6,12 +6,13 @@
 
 struct Arg {
     std::string val;
-    Location loc;       //immed if false
+    Location loc;       //NONE if false
     bool pointer;       //Anything can be a pointer
-    bool offset;        //only if a register
     AccessMode mode;    //relative is valid always when pointer or a jmp, otherwise has no effect
 
-    Arg(std::string val) : val(val) {
+    Arg() : val(""), loc(Location::NONE), pointer(false), mode(AccessMode::DIRECT) {}
+
+    void setVals(std::string val) : val(val) {
         loc = Instruction::getLocation(val);
 
         if(loc != Location::IMD) offset = Instruction::hasOffset(val);
@@ -52,9 +53,13 @@ void Compiler::run(line_vec& lines) {
 
         //Get the parameters (only 1 or 2 atm)
         std::string args = match[2];
-        Arg* arg_dst = nullptr;
-        Arg* arg_src = nullptr;
+        Arg arg_dst;
+        Arg arg_src;
         match = std::smatch();
+
+        //TODO: if arg_src and arg_dst are both NONE it is invalid and if src is NONE and dst is IMD change to RIMD
+        //TODO: Set this up where it will always read two parameters, and if it is an empty string it will be read
+        // Location::NONE. That will get rid of the annoying problems of two cases and what not.
 
         switch(getOPCodeParams(opcode)) {
             case 1:
@@ -109,9 +114,6 @@ void Compiler::run(line_vec& lines) {
             default:
                 throw std::invalid_argument("Only opcodes with 1 or 2 arguments are supported");
         }
-
-        delete arg_dst;
-        delete arg_src;
     }
     printLines(lines, true);
 }
