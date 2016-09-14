@@ -81,7 +81,7 @@ hex           [0-9A-F][0-9A-F_]*
 
 \n                                  ;
 [ \t]+                              ;
-.                                   yyerror("Invalid character");
+.                                   yyerror((string("Unexpected character: \'" + *yytext) + '\'').c_str());
 
 %%
 

@@ -1,28 +1,36 @@
 %{
-    #include <stdio.h>
-    #include <string>
-
+    #include "misc.h"
+    #include "parser.h"
 //    #define YYDEBUG 1
 
-    int yylex(void);
     extern int yylineno;
+    std::map<string, ArgVal> macros;
+
+    int yylex(void);
     void yyerror(const char*);
     void yywarn(const char*);
-    int yywrap();
-    int main();
+
+    void addMacro(const char* i, ArgVal val);
 
 %}
 
+%code requires { #include "parser.h" } /* shoves include into parser.hpp */
 %union {
     int64_t          sint;
     char*         cstring;
+    AccessMode       mode;
+    ArgVal*        argval;
+    Line*            line;
 };
 
 %token <sint> BIN OCT DEC HEX
 %token <cstring> LABEL MACRO WORD
 
 %type <sint> number
-%type <cstring> lines line labels arguments argument mode arg_val
+%type <cstring> lines
+%type <mode> mode
+%type <argval> arg_val
+%type <line> line labels arguments argument
 
 %start lines
 
@@ -34,8 +42,8 @@ lines           : lines line                                {;}
                 ;
 line            : labels WORD arguments                     { free($2); }
                 | WORD arguments                            { free($1); }
-                | MACRO WORD                                { free($1); free($2); }
-                | MACRO number                              { free($1); }
+                | MACRO WORD                                { addMacro($1, ArgVal($2)); free($1); }
+                | MACRO number                              { addMacro($1, ArgVal($2)); free($1); }
                 ;
 labels          : labels LABEL                              { free($2); }
                 | LABEL                                     { free($1); }
@@ -43,14 +51,14 @@ labels          : labels LABEL                              { free($2); }
 arguments       : argument ',' argument                     {;}
                 | argument                                  {;}
                 ;
-argument        : mode '[' arg_val ']'                      {;}
-                | mode arg_val                              {;}
+argument        : mode '[' arg_val ']'                      { delete $3; }
+                | mode arg_val                              { delete $2; }
                 ;
-mode            : /* empty */                               {;}
-                | '%'                                       {;}
+mode            : /* empty */                               { $$ = AccessMode::DIRECT;   }
+                | '%'                                       { $$ = AccessMode::RELATIVE; }
                 ;
-arg_val         : number                                    {;}
-                | WORD                                      { free($1); }
+arg_val         : number                                    { $$ = new ArgVal($1); }
+                | WORD                                      { $$ = new ArgVal($1); }
                 ;
 number          : BIN                                       { $$ = $1; }
                 | OCT                                       { $$ = $1; }
@@ -66,4 +74,11 @@ void yywarn(const char* str) {
 
 void yyerror(const char* str) {
     fprintf(stderr, "Error: %s, on line: %d\n", str, yylineno);
+}
+
+void addMacro(const char* i, ArgVal val) {
+    string ident(i);
+    if(macros.find(ident) != macros.end())
+        yywarn(("Redefinition of macro \"" + ident + "\"").c_str());
+    macros[ident] = val;
 }

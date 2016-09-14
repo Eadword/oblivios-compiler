@@ -14,7 +14,6 @@ typedef std::map<string, string> str_map;
 typedef std::map<string, uint16_t> label_map;
 typedef std::vector<Line> line_vec;
 
-
 line_vec readFile(const string& filename);
 void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "");
 

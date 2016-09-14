@@ -24,8 +24,8 @@ enum class DstSrc : uint8_t { DST, SRC };
 
 
 /**
- * This is a specialized bitset of 32bits which wraps it providing easy access to the
- * different stored parts like the opcode or access mode.
+ * This is a specialized bitset of 16bits which provides easy access to the different
+ * stored parts like the opcode or access mode.
  *
  * While many of the functions may not be necessary, they provide a level of security
  * as they verify the data is of the right type, and keep the code together if there
