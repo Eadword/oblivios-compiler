@@ -2,12 +2,12 @@
     #include <algorithm>
     #include <cstdio>
     #include <string>
-    
+
     #include "parser.hpp"
     extern YYSTYPE yylval;
-    
+
 	void yyerror(const char*);
-	long readValue(char* text, unsigned int base = 10);
+	int64_t readValue(char* text, uint8_t base = 10);
 %}
 
 %option caseless
@@ -23,46 +23,47 @@ hex           [0-9A-F][0-9A-F_]*
 [\[\],%]                            return *yytext;
 
 
--?[0-1][0-1_]*b                     { 
-                                        yylval.sint = readValue(yytext, 2);
-                                        return BIN; 
-                                    }
-                                    
--?[0-7][0-7_]*o                     {
-                                        yylval.sint = readValue(yytext, 8);
-                                        return OCT;
-                                    }
-                                    
--?[0-9][0-9_]*d?                    {
-                                        yylval.sint = readValue(yytext);
-                                        return DEC;
-                                    }
+-?[0-1][0-1_]*b {
+    yylval.sint = readValue(yytext, 2);
+    return BIN;
+}
 
--?0x{hex}h?                         {
-                                        yylval.sint = readValue(yytext, 16);
-                                        return HEX;
-                                    }
+-?[0-7][0-7_]*o {
+    yylval.sint = readValue(yytext, 8);
+    return OCT;
+}
 
--?(0x)?{hex}h                       {
-                                        yylval.sint = readValue(yytext, 16);
-                                        return HEX;
-                                    }
+-?[0-9][0-9_]*d? {
+    yylval.sint = readValue(yytext);
+    return DEC;
+}
+
+-?0x{hex}h? {
+    yylval.sint = readValue(yytext, 16);
+    return HEX;
+}
+
+-?(0x)?{hex}h {
+    yylval.sint = readValue(yytext, 16);
+    return HEX;
+}
 
 
-#{word}                             {
-                                        yylval.cstring = strdup(yytext);
-                                        return MACRO;
-                                    }
-                                    
-{word}:                             {
-                                        yylval.cstring = strdup(yytext);
-                                        return LABEL;
-                                    }
+#{word} {
+    yylval.cstring = strdup(yytext);
+    return MACRO;
+}
 
-{word}                              {
-                                        yylval.cstring = strdup(yytext);
-                                        return WORD;
-                                    }
+{word}: {
+    yylval.cstring = strdup(yytext);
+    return LABEL;
+}
+
+{word} {
+    yylval.cstring = strdup(yytext);
+    return WORD;
+}
+
 
 \n                                  ;
 [ \t]+                              ;
@@ -74,7 +75,7 @@ hex           [0-9A-F][0-9A-F_]*
  * Read a value/number from a cstring with a defined
  * base and cleaning the thing of other characters.
  */
-long readValue(char* text, unsigned int base) {
+int64_t readValue(char* text, uint8_t base) {
     bool neg = (*text == '-');
     std::string val(text);
     val.erase(
@@ -85,7 +86,7 @@ long readValue(char* text, unsigned int base) {
         ),
         val.end()
     );
-    
-    long ret = stoul(val, nullptr, base);
+
+    long ret = stoull(val, nullptr, base);
     return neg ? -1 * ret : ret;
 }

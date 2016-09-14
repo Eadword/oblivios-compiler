@@ -14,7 +14,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 include_directories(include)
 include_directories(data)
-set(SOURCE_FILES src/main.cpp src/preprocessor.cpp src/misc.cpp src/compiler.cpp src/instruction.cpp src/numbers.cpp)
+
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+
 add_executable(
     Compiler
     ${SOURCE_FILES}

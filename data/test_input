@@ -11,4 +11,3 @@ add macro3, bx
 movw bx, datalbl
 label2: label3:
 jmp label1
-

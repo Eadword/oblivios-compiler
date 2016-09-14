@@ -1,7 +1,7 @@
 %{
     #include <stdio.h>
     #include <string>
-    
+
 //    #define YYDEBUG 1
 
     int yylex(void);
@@ -9,7 +9,7 @@
     void yyerror(const char*);
     int yywrap();
     int main();
-    
+
 %}
 
 %union {
@@ -31,8 +31,8 @@ lines           : lines line                                {;}
                 | line                                      {;}
                 | /* empty */								{;} //the file has no code
                 ;
-line            : labels WORD arguments                     { free($2);}
-                | WORD arguments                            { free($1);}
+line            : labels WORD arguments                     { free($2); }
+                | WORD arguments                            { free($1); }
                 | MACRO WORD                                { free($1); free($2); } //TODO: support more than one following token
                 | MACRO number                              { free($1); }
                 ;
@@ -62,9 +62,4 @@ number          : BIN                                       {;}
 
 void yyerror(const char* str) {
     fprintf(stderr, "Error: %s, on line: %d\n", str, yylineno);
-}
-
-int main() {
-//    yydebug = 1;
-    return yyparse();
 }

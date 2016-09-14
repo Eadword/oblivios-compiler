@@ -1,8 +1,15 @@
 #include <iostream>
 
-#include "preprocessor.h"
-#include "compiler.h"
 #include "compiler_exception.h"
+#include "parser.hpp"
+
+extern FILE* yyin;
+extern FILE* yyout;
+
+int main() {
+//    yydebug = 1;
+    return yyparse();
+}
 
 /*int main(int argc, char** argv) {
     if(argc < 2) return 1;
