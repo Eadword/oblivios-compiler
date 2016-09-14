@@ -4,9 +4,11 @@
     #include <string>
 
     #include "parser.hpp"
+    #include "misc.h"
     extern YYSTYPE yylval;
 
 	void yyerror(const char*);
+    void yywarn(const char*);
 	int64_t readValue(char* text, uint8_t base = 10);
 %}
 
@@ -48,18 +50,30 @@ hex           [0-9A-F][0-9A-F_]*
     return HEX;
 }
 
-
 #{word} {
-    yylval.cstring = strdup(yytext);
+    yylval.cstring = strdup(yytext + 1); //don't include the octothrope
     return MACRO;
+
+    //Code for multipart macros; not messing with them for now
+    //because that would mess with the input stream for flex and
+    //probably have to be done in advance of comming back through
+    /*char* first = strtok(yytext, " \t");
+    char* second = strtok(NULL, " \t");
+
+    string identifier(first + 1);
+    string value(second);
+    if(macros.find(identifier) != macros.end())
+        yywarn(("Redefinition of macro \'" + identifier + "\'").c_str());
+    macros[identifier] = second;*/
 }
 
 {word}: {
-    yylval.cstring = strdup(yytext);
+    //the strtok will terminate the work cutting off the colon at the end
+    yylval.cstring = strdup(strtok(yytext, ":"));
     return LABEL;
 }
 
-{word} {
+{word}/[^:] { //prevent interpreting a word as a label
     yylval.cstring = strdup(yytext);
     return WORD;
 }
@@ -77,7 +91,7 @@ hex           [0-9A-F][0-9A-F_]*
  */
 int64_t readValue(char* text, uint8_t base) {
     bool neg = (*text == '-');
-    std::string val(text);
+    string val(text);
     val.erase(
         std::remove_if(
             val.begin(),

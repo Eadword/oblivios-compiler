@@ -7,18 +7,19 @@
     int yylex(void);
     extern int yylineno;
     void yyerror(const char*);
+    void yywarn(const char*);
     int yywrap();
     int main();
 
 %}
 
 %union {
-    int32_t          sint;
+    int64_t          sint;
     char*         cstring;
 };
 
 %token <sint> BIN OCT DEC HEX
-%token <cstring> MACRO LABEL WORD
+%token <cstring> LABEL MACRO WORD
 
 %type <sint> number
 %type <cstring> lines line labels arguments argument mode arg_val
@@ -33,7 +34,7 @@ lines           : lines line                                {;}
                 ;
 line            : labels WORD arguments                     { free($2); }
                 | WORD arguments                            { free($1); }
-                | MACRO WORD                                { free($1); free($2); } //TODO: support more than one following token
+                | MACRO WORD                                { free($1); free($2); }
                 | MACRO number                              { free($1); }
                 ;
 labels          : labels LABEL                              { free($2); }
@@ -51,14 +52,17 @@ mode            : /* empty */                               {;}
 arg_val         : number                                    {;}
                 | WORD                                      { free($1); }
                 ;
-number          : BIN                                       {;}
-                | OCT                                       {;}
-                | DEC                                       {;}
-                | HEX                                       {;}
+number          : BIN                                       { $$ = $1; }
+                | OCT                                       { $$ = $1; }
+                | DEC                                       { $$ = $1; }
+                | HEX                                       { $$ = $1; }
                 ;
 
 %%
 
+void yywarn(const char* str) {
+    fprintf(stdout, "Warning: %s, on line: %d\n", str, yylineno);
+}
 
 void yyerror(const char* str) {
     fprintf(stderr, "Error: %s, on line: %d\n", str, yylineno);
