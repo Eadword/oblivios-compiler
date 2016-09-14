@@ -10,7 +10,23 @@
     void yyerror(const char*);
     void yywarn(const char*);
 
+    /**
+     * Adds a macro to the gloabl hashmap.
+     *
+     * @param i the identifier
+     * @param val the substitution the macro represents
+     */
     void addMacro(const char* i, ArgVal val);
+
+    /**
+     * Adds the label to an exisitng set of labels, or creates a new set.
+     *
+     * @param i the identifier of the label
+     * @param labels an existing set of labels or nullptr
+     * @note copies the cstring into a std::string
+     * @returns the set of labels
+     */
+    Labels* addLabel(const char* i, Labels* labels = nullptr);
 
 %}
 
@@ -20,6 +36,8 @@
     char*         cstring;
     AccessMode       mode;
     ArgVal*        argval;
+    Argument*    argument;
+    Labels*        labels;
     Line*            line;
 };
 
@@ -30,7 +48,9 @@
 %type <cstring> lines
 %type <mode> mode
 %type <argval> arg_val
-%type <line> line labels arguments argument
+%type <argument> argument
+%type <labels> labels;
+%type <line> line arguments
 
 %start lines
 
@@ -45,14 +65,14 @@ line            : labels WORD arguments                     { free($2); }
                 | MACRO WORD                                { addMacro($1, ArgVal($2)); free($1); }
                 | MACRO number                              { addMacro($1, ArgVal($2)); free($1); }
                 ;
-labels          : labels LABEL                              { free($2); }
-                | LABEL                                     { free($1); }
+labels          : labels LABEL                              { $$ = addLabel($2, $1); free($2); }
+                | LABEL                                     { $$ = addLabel($1);     free($1); }
                 ;
-arguments       : argument ',' argument                     {;}
-                | argument                                  {;}
+arguments       : argument ',' argument                     { delete $1; delete $3; }
+                | argument                                  { delete $1;}
                 ;
-argument        : mode '[' arg_val ']'                      { delete $3; }
-                | mode arg_val                              { delete $2; }
+argument        : mode '[' arg_val ']'                      { $$ = new Argument($1, $3, true);  }
+                | mode arg_val                              { $$ = new Argument($1, $2, false); }
                 ;
 mode            : /* empty */                               { $$ = AccessMode::DIRECT;   }
                 | '%'                                       { $$ = AccessMode::RELATIVE; }
@@ -81,4 +101,10 @@ void addMacro(const char* i, ArgVal val) {
     if(macros.find(ident) != macros.end())
         yywarn(("Redefinition of macro \"" + ident + "\"").c_str());
     macros[ident] = val;
+}
+
+Labels* addLabel(const char* i, Labels* labels) {
+    if(labels == nullptr) labels = new Labels();
+    labels->insert(string(i));
+    return labels;
 }
