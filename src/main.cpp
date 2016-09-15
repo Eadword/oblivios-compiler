@@ -6,6 +6,7 @@
 
 extern FILE* yyin;
 extern int yyparse(void);
+extern std::map<string, ArgVal*> macros;
 
 int main(int argc, char** argv) {
     if(argc < 2) return 1;
@@ -17,5 +18,7 @@ int main(int argc, char** argv) {
     yyin = fd;
     yyparse();
     fclose(fd);
+
+    for(auto&& i : macros) delete i.second;
     return 0;
 }

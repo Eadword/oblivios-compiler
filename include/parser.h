@@ -8,36 +8,49 @@
  * it keeps track of whether the value is a string or integer.
  *
  * Opted to make this a class to force adherence to intended use.
- *
- * @note Takes ownership of the cstring
  */
 class ArgVal {
     bool number; //if false then it is a string
     union {
-        char*  cstring;
+        string*  str;
         int64_t sint;
     } val;
 
 public:
-    ArgVal() {
-        number = true;
+    ArgVal() : number(true) {
         val.sint = 0;
     }
 
-    ArgVal(int64_t i) {
-        number = true;
+    /**
+     * Performs deep copy
+     */
+    ArgVal(const ArgVal& av) : number(av.number) {
+        if(number) val.sint = av.val.sint;
+        else val.str = new string(*(av.val.str));
+    }
+
+    ArgVal(int64_t i) : number(true) {
         val.sint = i;
     }
 
-    ArgVal(char* c) {
-        number = false;
-        val.cstring = c;
+    /**
+     * @note makes a copy of the cstring
+     */
+    ArgVal(char* c) : number(false) {
+        val.str = new string(c);
     }
 
-    ~ArgVal() { if(!number) free(val.cstring); }
+    /**
+     * @note does not make a copy of the string
+     */
+    ArgVal(string* s) : number(false) {
+        val.str = s;
+    }
 
-    bool isNumber() { return number; }
-    const char* getString() { return !number ? val.cstring : nullptr; }
+    ~ArgVal() { if(!number) delete(val.str); }
+
+    bool isNum() { return number; }
+    const string* getStr() { return !number ? val.str : nullptr; }
     int64_t getSInt() { return number? val.sint : 0; }
 };
 

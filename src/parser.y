@@ -4,7 +4,7 @@
 //    #define YYDEBUG 1
 
     extern int yylineno;
-    std::map<string, ArgVal> macros;
+    std::map<string, ArgVal*> macros;
 
     int yylex(void);
     void yyerror(const char*);
@@ -16,7 +16,22 @@
      * @param i the identifier
      * @param val the substitution the macro represents
      */
-    void addMacro(const char* i, ArgVal val);
+    void addMacro(const char* i, ArgVal* val);
+
+    /**
+     * Checks for a string and applys the macro if needed.
+     * I do not believe there are any cases where a number must be forced, so
+     * for right now at least it only has forceword, which would be for an opcode
+     * for instance, which will never be a number, however arguments can be either.
+     *
+     * @note It will ususally not alter the input
+     * @note Deallocates the identifier string if needed
+     *
+     * @param i identifier string, the word that is being checked for replacement
+     * @param forceword if true it will throw an error if it replaces to a number
+     * @return A cstring after applying a macro if relevent
+     */
+    ArgVal* applyMacro(string* i, bool forceword = false);
 
     /**
      * Adds the label to an exisitng set of labels, or creates a new set.
@@ -56,34 +71,40 @@
 
 %%
 
-lines           : lines line                                {;}
-                | line                                      {;}
-                | /* empty */								{;} //the file has no code
+lines           : lines line                            {;}
+                | line                                  {;}
+                | /* empty */							{;} //the file has no code
                 ;
-line            : labels WORD arguments                     { free($2); }
-                | WORD arguments                            { free($1); }
-                | MACRO WORD                                { addMacro($1, ArgVal($2)); free($1); }
-                | MACRO number                              { addMacro($1, ArgVal($2)); free($1); }
+line            : labels WORD arguments                 {
+                                                            ArgVal* t = applyMacro(new std::string($2), true);
+                                                            free($2); delete t;
+                                                        }
+                | WORD arguments                        {
+                                                            ArgVal* t = applyMacro(new std::string($1), true);
+                                                            free($1); delete t;
+                                                        }
+                | MACRO WORD                            { addMacro($1, new ArgVal($2)); free($1); }
+                | MACRO number                          { addMacro($1, new ArgVal($2)); free($1); }
                 ;
-labels          : labels LABEL                              { $$ = addLabel($2, $1); free($2); }
-                | LABEL                                     { $$ = addLabel($1);     free($1); }
+labels          : labels LABEL                          { $$ = addLabel($2, $1); free($2); }
+                | LABEL                                 { $$ = addLabel($1);     free($1); }
                 ;
-arguments       : argument ',' argument                     { delete $1; delete $3; }
-                | argument                                  { delete $1;}
+arguments       : argument ',' argument                 { delete $1; delete $3; }
+                | argument                              { delete $1;}
                 ;
-argument        : mode '[' arg_val ']'                      { $$ = new Argument($1, $3, true);  }
-                | mode arg_val                              { $$ = new Argument($1, $2, false); }
+argument        : mode '[' arg_val ']'                  { $$ = new Argument($1, $3, true);  }
+                | mode arg_val                          { $$ = new Argument($1, $2, false); }
                 ;
-mode            : /* empty */                               { $$ = AccessMode::DIRECT;   }
-                | '%'                                       { $$ = AccessMode::RELATIVE; }
+mode            : /* empty */                           { $$ = AccessMode::DIRECT;   }
+                | '%'                                   { $$ = AccessMode::RELATIVE; }
                 ;
-arg_val         : number                                    { $$ = new ArgVal($1); }
-                | WORD                                      { $$ = new ArgVal($1); }
+arg_val         : number                                { $$ = new ArgVal($1); }
+                | WORD                                  { $$ = applyMacro(new std::string($1)); free($1); }
                 ;
-number          : BIN                                       { $$ = $1; }
-                | OCT                                       { $$ = $1; }
-                | DEC                                       { $$ = $1; }
-                | HEX                                       { $$ = $1; }
+number          : BIN                                   { $$ = $1; }
+                | OCT                                   { $$ = $1; }
+                | DEC                                   { $$ = $1; }
+                | HEX                                   { $$ = $1; }
                 ;
 
 %%
@@ -96,11 +117,25 @@ void yyerror(const char* str) {
     fprintf(stderr, "Error: %s, on line: %d\n", str, yylineno);
 }
 
-void addMacro(const char* i, ArgVal val) {
+void addMacro(const char* i, ArgVal* val) {
     string ident(i);
     if(macros.find(ident) != macros.end())
         yywarn(("Redefinition of macro \"" + ident + "\"").c_str());
     macros[ident] = val;
+}
+
+ArgVal* applyMacro(string* i, bool forceword) {
+    ArgVal* t = nullptr;
+    try {
+        t = macros.at(*i);
+    } catch(std::out_of_range& e) {
+        return new ArgVal(i);
+    }
+
+    delete i; //Already know it is not the origional
+    if(forceword && t->isNum())
+        yyerror("Macro replacement to number of string only type");
+    return new ArgVal(*t);
 }
 
 Labels* addLabel(const char* i, Labels* labels) {
