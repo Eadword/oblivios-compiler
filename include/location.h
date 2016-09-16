@@ -1,5 +1,8 @@
 #pragma once
 
+#include <map>
+#include <regex>
+
 //TODO: use namespace?
 enum class Location : uint8_t {
     #define X(name, str, dstval, srcval) name

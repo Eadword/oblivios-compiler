@@ -1,7 +1,9 @@
 #pragma once
 
 #include <set>
+
 #include "misc.h"
+#include "line.h"
 
 /**
  * An unfortunate need for the parser to keep things from being confused,
@@ -64,5 +66,3 @@ struct Argument {
 
     ~Argument() { delete val; }
 };
-
-typedef std::set<string> Labels;

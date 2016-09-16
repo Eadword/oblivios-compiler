@@ -1,6 +1,8 @@
 %{
     #include "misc.h"
     #include "parser.h"
+    #include "line.h"
+
 //    #define YYDEBUG 1
 
     extern int yylineno;

@@ -1,6 +1,12 @@
 #pragma once
+#include <set>
+#include <string>
 
 #include "instruction.h"
+
+typedef std::set<std::string> Labels;
+class Argument;
+
 
 using std::string;
 
@@ -12,29 +18,29 @@ using std::string;
  * It also store the line number, because as things progress, blank lines will be removed and so on,
  * allowing easier debugging down the road.
  *
- * A line num of 0 indicates that it was generated for compilation purposes.
+ * A org_line value of 0 indicates that it was generated for compilation purposes. (Though this may
+ * not ever happen depending on my implementation)
  *
  * Compiled instructions are stored in this to further help with debugging, by keeping everything
  * together, makes it easy to see what lead to what and find mistakes.
+ *
+ * @note takes ownership of every pointer.
  */
 struct Line {
     /// Original line number
-    unsigned int num;
-    /// Original string representing the line
-    string org;
-    /// Current string representing the line
-    string cur;
+    const uint32_t org_line;
+
+    //Set of all labels that point to this line
+    Labels* labels;
+    Argument* dst;
+    Argument* src;
     /// Compiled instruction
     Instruction ins;
 
-    Line() {}
+    Line();
+    Line(uint32_t org_line, Labels* labels, Argument* dst, Argument* src);
 
-    /**
-     * Constructs a valid line structure.
-     * @note if cur is the empty string, it will be initialized to org.
-     */
-    Line(unsigned int num, string org, string cur = "") :
-            num(num), org(org), cur( (cur == "" ? org : cur) ) {}
+    ~Line();
 
-    ~Line() {}
+    void compile();
 };

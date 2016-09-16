@@ -4,28 +4,22 @@
 #include <string>
 #include <vector>
 
-#include "line.h"
-
 #define DEBUG
 
 using std::string;
 typedef std::vector<string> str_vec;
 typedef std::map<string, string> str_map;
 typedef std::map<string, uint16_t> label_map;
-typedef std::vector<Line> line_vec;
 
-line_vec readFile(const string& filename);
-void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "");
+//void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "");
 
 
 #ifdef DEBUG
 void debugStrMap(const std::map<string, string>&);
 void debugLabelMap(const std::map<string, uint16_t>&);
-void printLines(const line_vec&, bool bin = false);
 #else
 #define debugStrMap(var)
 #define debugLabelMap(var)
-#define debugVector(var)
 #endif
 
 // Example of regex_iterator

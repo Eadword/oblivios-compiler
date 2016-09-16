@@ -1,5 +1,7 @@
 #pragma once
 
+//TODO: decide whether to keep this, generated C code makes this less useful
+
 #include <exception>
 #include <string>
 #include <stdexcept>
@@ -11,23 +13,21 @@
  */
 struct compiler_exception : public std::runtime_error {
 
-    static string composeError(string error, const line_vec& lines, unsigned int line) {
-        while(lines[line].num == 0) ++line; //find next line which was not generated
-        return error + " (" + std::to_string(lines[line].num) + "): " + lines[line].org;
+    static string composeError(string error, uint32_t line) {
+        return error + " (" + std::to_string(line) + ")";
     }
 
     /**
      * @param error The error incurred, e.g. "Invalid Macro"
-     * @param lines The lines of code within which the error occurred within
-     * @param line  The current line where the error occurred (i.e. position in vector)
+     * @param line  The current line where the error occurred
      */
-    compiler_exception(string error, const line_vec& lines, unsigned int line) :
-            std::runtime_error(composeError(error, lines, line)) {}
+    compiler_exception(string error, uint32_t line) :
+            std::runtime_error(composeError(error, line)) {}
 };
 
 struct identifier_exception : public compiler_exception {
 
     identifier_exception(const string &error, const string &identifier,
-                         const line_vec &lines, unsigned int line) :
-            compiler_exception(error + " \"" + identifier + "\"", lines, line) {}
+                         uint32_t line) :
+            compiler_exception(error + " \"" + identifier + "\"", line) {}
 };

@@ -2,11 +2,14 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <stdexcept>
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "location.h"
+#include "opcode.h"
 
 struct instruction_error : public std::runtime_error {
     /**
@@ -18,10 +21,6 @@ struct instruction_error : public std::runtime_error {
 enum class InsType : uint8_t { DAT, OP };
 enum class AccessMode : uint8_t { DIRECT, RELATIVE };
 enum class DstSrc : uint8_t { DST, SRC };
-
-#include "opcode.h"
-#include "location.h"
-
 
 /**
  * This is a specialized bitset of 16bits which provides easy access to the different
