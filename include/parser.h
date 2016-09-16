@@ -51,9 +51,9 @@ public:
 
     ~ArgVal() { if(!number) delete(val.str); }
 
-    bool isNum() { return number; }
-    const string* getStr() { return !number ? val.str : nullptr; }
-    int64_t getSInt() { return number? val.sint : 0; }
+    bool isNum() const { return number; }
+    const string* getStr() const { return !number ? val.str : nullptr; }
+    int64_t getSInt() const { return number ? val.sint : 0; }
 };
 
 struct Argument {

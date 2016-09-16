@@ -73,26 +73,33 @@
 
 %%
 
-lines           : lines line                            {;}
-                | line                                  {;}
+lines           : lines line                            { delete $2; }
+                | line                                  { delete $1; }
                 | /* empty */							{;} //the file has no code
                 ;
 line            : labels WORD arguments                 {
+                                                            $$ = $3;
                                                             ArgVal* t = applyMacro(new std::string($2), true);
-                                                            free($2); delete t;
+                                                            free($2);
+                                                            $$->setOPCode(t);
+                                                            delete t;
+                                                            $$->labels = $1;
                                                         }
                 | WORD arguments                        {
+                                                            $$ = $2;
                                                             ArgVal* t = applyMacro(new std::string($1), true);
-                                                            free($1); delete t;
+                                                            free($1);
+                                                            $$->setOPCode(t);
+                                                            delete t;
                                                         }
-                | MACRO WORD                            { addMacro($1, new ArgVal($2)); free($1); }
-                | MACRO number                          { addMacro($1, new ArgVal($2)); free($1); }
+                | MACRO WORD                            { $$ = nullptr; addMacro($1, new ArgVal($2)); free($1); }
+                | MACRO number                          { $$ = nullptr; addMacro($1, new ArgVal($2)); free($1); }
                 ;
 labels          : labels LABEL                          { $$ = addLabel($2, $1); free($2); }
                 | LABEL                                 { $$ = addLabel($1);     free($1); }
                 ;
-arguments       : argument ',' argument                 { delete $1; delete $3; }
-                | argument                              { delete $1;}
+arguments       : argument ',' argument                 { $$ = new Line(yylineno, nullptr, $1, $3); }
+                | argument                              { $$ = new Line(yylineno, nullptr, $1, nullptr); }
                 ;
 argument        : mode '[' arg_val ']'                  { $$ = new Argument($1, $3, true);  }
                 | mode arg_val                          { $$ = new Argument($1, $2, false); }

@@ -3,9 +3,11 @@
 #include <string>
 
 #include "instruction.h"
+#include "opcode.h"
 
 typedef std::set<std::string> Labels;
 class Argument;
+class ArgVal;
 
 
 using std::string;
@@ -32,6 +34,7 @@ struct Line {
 
     //Set of all labels that point to this line
     Labels* labels;
+    OPCode opcode;
     Argument* dst;
     Argument* src;
     /// Compiled instruction
@@ -42,5 +45,10 @@ struct Line {
 
     ~Line();
 
+    /**
+     * Sets the opcode to the value.
+     * @param val Must not be a number, otherwise it calls an error
+     */
+    void setOPCode(ArgVal* val);
     void compile();
 };

@@ -1,5 +1,6 @@
 %{
     #include <algorithm>
+    #include <locale>
     #include <cstdio>
     #include <string>
 
@@ -10,6 +11,7 @@
 	void yyerror(const char*);
     void yywarn(const char*);
 	int64_t readValue(char* text, uint8_t base = 10);
+    void toUpper(char*);
 %}
 
 %option caseless
@@ -52,6 +54,7 @@ hex           [0-9A-F][0-9A-F_]*
 
 #{word} {
     yylval.cstring = strdup(yytext + 1); //don't include the octothrope
+    toUpper(yylval.cstring);
     return MACRO;
 
     //Code for multipart macros; not messing with them for now
@@ -70,11 +73,13 @@ hex           [0-9A-F][0-9A-F_]*
 {word}: {
     //the strtok will terminate the work cutting off the colon at the end
     yylval.cstring = strdup(strtok(yytext, ":"));
+    toUpper(yylval.cstring);
     return LABEL;
 }
 
 {word}/[^:] { //prevent interpreting a word as a label
     yylval.cstring = strdup(yytext);
+    toUpper(yylval.cstring);
     return WORD;
 }
 
@@ -84,6 +89,11 @@ hex           [0-9A-F][0-9A-F_]*
 .                                   yyerror((string("Unexpected character: \'" + *yytext) + '\'').c_str());
 
 %%
+
+void toUpper(char* i) {
+    for( ; *i != '\0'; ++i)
+        *i = std::toupper(*i);
+}
 
 /**
  * Read a value/number from a cstring with a defined

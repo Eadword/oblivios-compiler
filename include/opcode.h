@@ -6,6 +6,7 @@ enum class OPCode : uint8_t {
     #undef X
 };
 
+//TODO: use a set or map
 const std::vector<std::string> OPCode_Strings {
     #define X(val, b) #val
     #include "opcodes"
