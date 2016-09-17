@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
         if(line->dst && !line->dst->val->isNum()) {
             try {
                 uint32_t loc = labels.at(*line->dst->val->getStr());
+                if(line->dst->pointer) std::cerr << "Labels should not be pointers: (" << *line << ")" << std::endl;
                 delete line->dst->val;
                 line->dst->val = new ArgVal(static_cast<int64_t>(loc) - static_cast<int64_t>(x));
                 line->dst->mode = AccessMode::RELATIVE;
@@ -61,9 +62,11 @@ int main(int argc, char** argv) {
         if(line->src && !line->src->val->isNum()) {
             try {
                 uint32_t loc = labels.at(*line->src->val->getStr());
+                if(line->src->pointer) std::cerr << "Labels should not be pointers: (" << *line << ")" << std::endl;
                 delete line->src->val;
                 line->src->val = new ArgVal(static_cast<int64_t>(loc) - static_cast<int64_t>(x));
                 line->src->mode = AccessMode::RELATIVE;
+                if(line->dst->pointer) std::cerr << "Labels cannot be pointers" << "\n";
             } catch(std::out_of_range& e) {
                 // do nothing
             }
