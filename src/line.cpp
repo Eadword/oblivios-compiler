@@ -8,9 +8,9 @@ Line::Line(uint32_t org_line, Labels* labels, Argument* dst, Argument* src) :
         org_line(org_line), opcode(OPCode::NONE), labels(labels), dst(dst), src(src) {}
 
 Line::~Line() {
-    //delete labels;
-    //delete dst;
-    //delete src;
+    delete labels;
+    delete dst;
+    delete src;
 }
 
 void Line::setOPCode(ArgVal* val) {
@@ -29,4 +29,18 @@ void Line::setOPCode(ArgVal* val) {
 
 void Line::compile() {
     //TODO: this
+}
+
+std::ostream& operator<<(std::ostream& out, const Line& line) {
+    out << line.org_line << "| ";
+
+    if(line.labels != nullptr)
+        for(Labels::iterator i = line.labels->begin(); i != line.labels->end(); ++i)
+            out << *i << ": ";
+
+    out << line.opcode << " ";
+    out << *line.dst;
+    if(line.src != nullptr)
+        out << ", " << *line.src;
+    return out;
 }

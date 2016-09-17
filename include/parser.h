@@ -1,9 +1,10 @@
 #pragma once
 
+#include <ostream>
 #include <set>
 
-#include "misc.h"
 #include "line.h"
+#include "misc.h"
 
 /**
  * An unfortunate need for the parser to keep things from being confused,
@@ -15,24 +16,26 @@ class ArgVal {
     bool number; //if false then it is a string
     union {
         string*  str;
-        int64_t sint;
+        int64_t num;
     } val;
+
+    friend std::ostream& operator<<(std::ostream& out, const ArgVal& av);
 
 public:
     ArgVal() : number(true) {
-        val.sint = 0;
+        val.num = 0;
     }
 
     /**
      * Performs deep copy
      */
     ArgVal(const ArgVal& av) : number(av.number) {
-        if(number) val.sint = av.val.sint;
+        if(number) val.num = av.val.num;
         else val.str = new string(*(av.val.str));
     }
 
     ArgVal(int64_t i) : number(true) {
-        val.sint = i;
+        val.num = i;
     }
 
     /**
@@ -53,8 +56,14 @@ public:
 
     bool isNum() const { return number; }
     const string* getStr() const { return !number ? val.str : nullptr; }
-    int64_t getSInt() const { return number ? val.sint : 0; }
+    int64_t getNum() const { return number ? val.num : 0; }
 };
+
+/// For debugging
+inline std::ostream& operator<<(std::ostream& out, const ArgVal& av) {
+    if(av.number) return out << av.val.num;
+    return out << *av.val.str;
+}
 
 struct Argument {
     AccessMode mode;
@@ -66,3 +75,10 @@ struct Argument {
 
     ~Argument() { delete val; }
 };
+
+/// For debugging
+inline std::ostream& operator<<(std::ostream& out, const Argument& arg) {
+    if(arg.mode == AccessMode::RELATIVE) out << "%";
+    if(arg.pointer) return out << "[" << *arg.val << "]";
+    return out << *arg.val;
+}

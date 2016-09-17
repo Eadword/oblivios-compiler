@@ -7,6 +7,7 @@
 
     extern int yylineno;
     std::map<string, ArgVal*> macros;
+    std::vector<Line*> lines;
 
     int yylex(void);
     void yyerror(const char*);
@@ -49,33 +50,43 @@
 
 %code requires { #include "parser.h" } /* shoves include into parser.hpp */
 %union {
-    int64_t          sint;
-    char*         cstring;
-    AccessMode       mode;
-    ArgVal*        argval;
-    Argument*    argument;
-    Labels*        labels;
-    Line*            line;
+    int64_t                 sint;
+    char*                   cstring;
+    AccessMode              mode;
+    ArgVal*                 argval;
+    Argument*               argument;
+    Labels*                 labels;
+    Line*                   line;
 };
 
 %token <sint> BIN OCT DEC HEX
 %token <cstring> LABEL MACRO WORD
 
 %type <sint> number
-%type <cstring> lines
 %type <mode> mode
 %type <argval> arg_val
 %type <argument> argument
 %type <labels> labels;
 %type <line> line arguments
+%type <cstring> lines
 
 %start lines
 
 %%
 
-lines           : lines line                            { delete $2; }
-                | line                                  { delete $1; }
-                | /* empty */							{;} //the file has no code
+lines           : lines line                            {
+                                                            if($2 != nullptr) {
+                                                                $2->compile();
+                                                                lines.push_back($2);
+                                                            }
+                                                        }
+                | line                                  {
+                                                            if($1 != nullptr) {
+                                                                $1->compile();
+                                                                lines.push_back($1);
+                                                            }
+                                                        }
+                | /* empty */							{ /* the file has no code */; }
                 ;
 line            : labels WORD arguments                 {
                                                             $$ = $3;
@@ -92,7 +103,12 @@ line            : labels WORD arguments                 {
                                                             $$->setOPCode(t);
                                                             delete t;
                                                         }
-                | MACRO WORD                            { $$ = nullptr; addMacro($1, new ArgVal($2)); free($1); }
+                | MACRO WORD                            {
+                                                            $$ = nullptr;
+                                                            // allow macros to replace each other
+                                                            addMacro($1, applyMacro(new std::string($2)));
+                                                            free($1); free($2);
+                                                        }
                 | MACRO number                          { $$ = nullptr; addMacro($1, new ArgVal($2)); free($1); }
                 ;
 labels          : labels LABEL                          { $$ = addLabel($2, $1); free($2); }

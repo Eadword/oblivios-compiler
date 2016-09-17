@@ -29,6 +29,8 @@ using std::string;
  * @note takes ownership of every pointer.
  */
 struct Line {
+    friend std::ostream& operator<<(std::ostream&, const Line&);
+
     /// Original line number
     const uint32_t org_line;
 

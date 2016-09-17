@@ -23,6 +23,10 @@ inline std::string OPCodeToString(OPCode op) {
     return OPCode_Strings[(uint8_t)op];
 }
 
+inline std::ostream& operator<<(std::ostream& out, OPCode op) {
+    return out << OPCodeToString(op);
+}
+
 inline OPCode OPCodeFromString(const std::string& op) {
     auto loc = std::find(OPCode_Strings.begin(), OPCode_Strings.end(), op);
     if(loc == OPCode_Strings.end()) throw std::invalid_argument("OPCode " + op + " is not valid");
