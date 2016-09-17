@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+class Argument;
+
 #define DEBUG
 
 using std::string;
@@ -11,6 +13,7 @@ typedef std::vector<string> str_vec;
 typedef std::map<string, string> str_map;
 typedef std::map<string, uint16_t> label_map;
 
+void applyLabels(Argument* arg, const std::map<string, uint32_t>& labels, uint32_t cur_loc);
 //void applyReplace(line_vec& lines, const std::regex& pattern, string new_val = "");
 
 

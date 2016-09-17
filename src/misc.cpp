@@ -3,11 +3,27 @@
 #include <bitset>
 
 #include "misc.h"
+#include "parser.h"
 
 // void applyReplace(line_vec& lines, const std::regex& pattern, string new_val) {
 //     for(Line& line : lines)
 //         line.cur = std::regex_replace(line.cur, pattern, new_val);
 // }
+
+void applyLabels(Argument* arg, const std::map<string, uint32_t>& labels, uint32_t cur_loc) {
+    if(!arg || arg->val->isNum()) return;
+    uint32_t lbl_loc;
+    try {
+        lbl_loc = labels.at(*arg->val->getStr());
+    } catch(std::out_of_range& e) {
+        return; // do nothing, it is not a label
+    }
+
+    if(arg->pointer) std::cerr << "Labels should not be pointers: (" << *arg << ")" << std::endl;
+    delete arg->val; // replace the arg
+    arg->val = new ArgVal(static_cast<int64_t>(lbl_loc) - static_cast<int64_t>(cur_loc));
+    arg->mode = AccessMode::RELATIVE; //labels should always be relative to IP
+}
 
 #ifdef DEBUG
 void debugStrMap(const std::map<string, string>& map) {
