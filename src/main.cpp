@@ -45,13 +45,20 @@ int main(int argc, char** argv) {
 
     // actually compile the program
     for(uint32_t x = 0; x < lines.size(); ++x) {
-        const Line* line = lines[x];
+        Line* line = lines[x];
 
         // convert labels to offsets
         applyLabels(line->dst, labels, x);
         applyLabels(line->src, labels, x);
 
         // convert to binary
+        try {
+            line->compile();
+        } catch(std::invalid_argument& e) {
+            std::cerr << e.what() << " (" << *line << ")" << std::endl;
+        } catch(instruction_error& e) {
+            std::cerr << e.what() << " (" << *line << ")" << std::endl;
+        }
 
         // export the data to the binary file
 

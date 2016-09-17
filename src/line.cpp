@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "line.h"
 #include "parser.h"
 
@@ -28,7 +30,33 @@ void Line::setOPCode(ArgVal* val) {
 }
 
 void Line::compile() {
-    //TODO: this
+    //opcode is already set
+    if(opcode == OPCode::DAT) {
+        ins = Instruction(InsType::DAT);
+        ins.setData(dst->val);
+        return;
+    }
+
+    ins = Instruction(InsType::OP);
+
+    // set the arguments
+    ins.setRoute(LocationFromArg(dst), LocationFromArg(src));
+
+    if(dst) ins.setDestMode(dst->mode);
+    if(src) ins.setSrcMode(src->mode);
+
+    // set the opcode, special cases are interpreted by arguments
+    switch (opcode) {
+    case OPCode::MOV:
+        break;
+    case OPCode::SWP:
+        break;
+    default:
+        break;
+    }
+    ins.setOPCode(opcode);
+
+    // verify that opcode and params make sense
 }
 
 std::ostream& operator<<(std::ostream& out, const Line& line) {

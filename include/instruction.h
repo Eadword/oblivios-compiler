@@ -22,6 +22,8 @@ enum class InsType : uint8_t { DAT, OP };
 enum class AccessMode : uint8_t { DIRECT, RELATIVE };
 enum class DstSrc : uint8_t { DST, SRC };
 
+class ArgVal;
+
 /**
  * This is a specialized bitset of 16bits which provides easy access to the different
  * stored parts like the opcode or access mode.
@@ -53,21 +55,17 @@ struct Instruction {
     AccessMode getSrcMode();
 
     void setRoute(Location dst, Location src);
+    void setRout(ArgVal* dst, ArgVal* src);
     std::pair<Location, Location> getRoute();
 
     void setData(uint16_t);
 
+    /**
+     * Converts the int64_t in argval
+     */
+    void setData(ArgVal*);
+
 
     static uint8_t routeToBinary(Location dst, Location src);
     static std::pair<Location, Location> binaryToRoute(uint8_t binary);
-
-    /**
-     * If the destination turns out to be an immediate and source is empty
-     * it is RIMD. If the src is not empty but the dst is an IMD, it
-     * is invalid.
-     */
-    static Location getLocation(const std::string& arg);
-
-    ///Can be relevant even if it is not a pointer, e.g. jmp
-    static AccessMode getMode(const std::string& arg);
 };

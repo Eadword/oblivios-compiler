@@ -9,11 +9,11 @@ X(AX,  "AX",    6, 6),
 X(BX,  "BX",    7, 7),
 X(CX,  "CX",    8, 8),
 X(IP,  "IP",   -2, 9),
-X(IMD, "",     -2, 10),
+X(IMD, "",     -1, 10),
 X(PAX, "[AX]",  9, 11),
 X(PBX, "[BX]", 10, 12),
 X(PCX, "[CX]", 11, 13),
 X(PIMD,"",     12, 14),
 
-X(RIMD,"",     -1, -2), // read only the immediate
+X(RIMD,"",     -1, -2), // read only the immediate, treat DST as a SRC
 X(NONE, "", -2, -1)

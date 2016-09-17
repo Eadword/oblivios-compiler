@@ -1,5 +1,8 @@
+#include <iostream>
 #include <regex>
+
 #include "instruction.h"
+#include "parser.h"
 #include "patterns.h"
 
 void Instruction::setOPCode(OPCode code) {
@@ -78,6 +81,27 @@ void Instruction::setData(uint16_t d) {
     data = d;
 }
 
+void Instruction::setData(ArgVal* d) {
+    if(!d || !d->isNum()) {
+        setData((uint16_t)0);
+        return;
+    }
+
+    int64_t val = d->getNum();
+    //This may seem stupid, but people can this way specifiy two's compliment on their own
+    // or specify a negitive to get an unsigned value. Ultimately it is about the context of
+    // where it is used that decides things
+    if(val > UINT16_MAX) {
+        std::cerr << "Truncating data with value: " << d << std::endl;
+        setData(UINT16_MAX);
+    } else if(val < INT16_MIN) {
+        std::cerr << "Truncating data with value: " << d << std::endl;
+        setData((uint16_t)INT16_MIN);
+    } else {
+        setData((uint16_t)val);
+    }
+}
+
 
 
 uint8_t Instruction::routeToBinary(Location dst, Location src) {
@@ -88,6 +112,9 @@ uint8_t Instruction::routeToBinary(Location dst, Location src) {
 
     uint8_t route = 0x00;
     if(dstv == -1) { //special cases
+        if(dst == Location::IMD && src == Location::NONE) dst = Location::RIMD;
+        else if(dst == Location::IMD) throw instruction_error("Destination cannot be an immediate");
+
         if(dst == Location::RIMD) {
             route = 0xFF;
             srcv = -2;
@@ -130,28 +157,4 @@ std::pair<Location, Location> Instruction::binaryToRoute(uint8_t binary) {
         throw instruction_error("Invalid route " + std::bitset<8>(binary).to_string());
 
     return dstsrc;
-}
-
-
-Location Instruction::getLocation(const std::string& arg) {
-    std::smatch match;
-    if(!std::regex_match(arg, match, Patterns::get_location))
-        throw instruction_error("Cannot interpret registry/immediate value " + arg);
-
-    Location loc;
-    try {
-         loc = LocationFromString(match[1]);
-    } catch(std::invalid_argument e) {
-        throw instruction_error(e.what());
-    }
-
-    return loc;
-}
-
-AccessMode Instruction::getMode(const std::string& arg) {
-    std::smatch match;
-    if(std::regex_match(arg, match, Patterns::is_relative))
-        return AccessMode::RELATIVE;
-
-    return AccessMode::DIRECT;
 }

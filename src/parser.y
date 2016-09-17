@@ -76,13 +76,11 @@
 
 lines           : lines line                            {
                                                             if($2 != nullptr) {
-                                                                $2->compile();
                                                                 lines.push_back($2);
                                                             }
                                                         }
                 | line                                  {
                                                             if($1 != nullptr) {
-                                                                $1->compile();
                                                                 lines.push_back($1);
                                                             }
                                                         }
