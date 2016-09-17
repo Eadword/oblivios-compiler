@@ -32,7 +32,7 @@ struct Line {
     friend std::ostream& operator<<(std::ostream&, const Line&);
 
     /// Original line number
-    const uint32_t org_line;
+    const uint32_t org_line; //TODO: Figure out why this is not correct or stop storing it
 
     //Set of all labels that point to this line
     Labels* labels;
