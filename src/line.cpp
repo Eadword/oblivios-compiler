@@ -75,18 +75,22 @@ void Line::compile() {
     }
 
 
-    // set the opcode, special cases are interpreted by arguments
-    switch (opcode) {
-    case OPCode::MOV:
-        break;
-    case OPCode::SWP:
-        break;
-    default:
-        break;
+    // set opcode and verfiy correcness of parameters for operator
+    // TODO: allow auto interpretation of MOV or SWAP?
+    uint8_t expected_params = getOPCodeParams(opcode);
+    const char* incorrect_params = "Incorrect number of parameters for operator";
+    if(expected_params == 2) {
+        if(route.first == Location::NONE || route.second == Location::NONE)
+            throw std::invalid_argument(incorrect_params);
+    } else if(expected_params == 1) {
+        if(route.first == Location::NONE)
+            throw std::invalid_argument(incorrect_params);
+    } else if(expected_params == 0) {
+        // not used at the time of writing
+    } else {
+        throw std::invalid_argument(incorrect_params);
     }
     ins.setOPCode(opcode);
-
-    // verify that opcode and params make sense
 }
 
 std::ostream& operator<<(std::ostream& out, const Line& line) {

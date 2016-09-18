@@ -34,6 +34,4 @@ X(JO, 1),
 X(JNO, 1),
 
 X(DAT, 1),
-X(MOV, 2),
-X(SWP, 2),
 X(NONE, 0)
