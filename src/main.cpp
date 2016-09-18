@@ -45,12 +45,14 @@ int main(int argc, char** argv) {
 
     // actually compile the program
     fd = fopen(argv[2], "w");
+    uint32_t offset = 0; // additional offset to account for immediates
     for(uint32_t x = 0; x < lines.size(); ++x) {
         Line* line = lines[x];
 
         // convert labels to offsets
-        applyLabels(line->dst, labels, x);
-        applyLabels(line->src, labels, x);
+        applyLabels(line->dst, labels, x + offset);
+        applyLabels(line->src, labels, x + offset);
+        offset += line->ins.imds;
 
         // convert to binary
         try {

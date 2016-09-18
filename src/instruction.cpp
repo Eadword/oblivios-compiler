@@ -13,7 +13,7 @@ void Instruction::setOPCode(OPCode code) {
     data |= ((uint16_t)code) << 10;
 }
 
-OPCode Instruction::getOPCode() {
+OPCode Instruction::getOPCode() const {
     if(type == InsType::DAT)
         throw instruction_error("Cannot retrieve opcode from DAT type");
 
@@ -43,14 +43,14 @@ void Instruction::setSrcMode(AccessMode mode) {
     data |= ((uint16_t)mode) << 8;
 }
 
-AccessMode Instruction::getDestMode() {
+AccessMode Instruction::getDestMode() const {
     if(type == InsType::DAT)
         throw instruction_error("Cannot retrieve destination access mode from DAT type");
 
     return (AccessMode)((data & 0x0200) >> 9);
 }
 
-AccessMode Instruction::getSrcMode() {
+AccessMode Instruction::getSrcMode() const {
     if(type == InsType::DAT)
         throw instruction_error("Cannot retrieve source access mode from type DAT type");
 
@@ -61,12 +61,19 @@ AccessMode Instruction::getSrcMode() {
 void Instruction::setRoute(Location dst, Location src) {
     if(type == InsType::DAT)
         throw instruction_error("Cannot set route for DAT type");
+    if(src == Location::RIMD)
+        throw instruction_error("Source cannot be RIMD");
 
     data &= 0xFF00; //1111 1111 0000 0000
     data |= (uint16_t)routeToBinary(dst, src);
+
+    //update imds
+    imds = 0;
+    if(dst == Location::IMD || dst == Location::PIMD || dst == Location::RIMD) ++imds;
+    if(src == Location::IMD || src == Location::PIMD) ++imds;
 }
 
-std::pair<Location, Location> Instruction::getRoute() {
+std::pair<Location, Location> Instruction::getRoute() const {
     if(type == InsType::DAT)
         throw instruction_error("Cannot get route for DAT type");
 
@@ -81,7 +88,7 @@ void Instruction::setData(uint16_t d) {
     data = d;
 }
 
-void Instruction::setData(ArgVal* d) {
+void Instruction::setData(const ArgVal* d) {
     if(!d || !d->isNum()) {
         setData((uint16_t)0);
         return;
@@ -89,17 +96,46 @@ void Instruction::setData(ArgVal* d) {
     setData(convertInt(d->getNum()));
 }
 
-void Instruction::setImdDst(ArgVal* d) {
+void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
+    std::pair<Location, Location> route = getRoute();
+
+    if(dst) {
+        switch(route.first) {
+        case Location::IMD:
+        case Location::PIMD:
+        case Location::RIMD:
+            setImdDst(dst);
+            break;
+        default:
+            break;
+            //Do nothing
+        }
+    }
+    if(src) {
+        switch(route.second) {
+        case Location::IMD:
+        case Location::PIMD:
+            if(imds > 0) setImdSrc(src);
+            else setImdDst(src);
+            break;
+        default:
+            break;
+            //Do nothing
+        }
+    }
+}
+
+void Instruction::setImdDst(const ArgVal* d) {
     if(!d || !d->isNum()) return;
     imd_dst = convertInt(d->getNum());
 }
 
-void Instruction::setImdSrc(ArgVal* d) {
+void Instruction::setImdSrc(const ArgVal* d) {
     if(!d || !d->isNum()) return;
     imd_src = convertInt(d->getNum());
 }
 
-void Instruction::write(FILE* fd) {
+void Instruction::write(FILE* fd) const {
     //while it would be faster to just go through all of them in one call,
     //  there is a potential of the class being changed in a way which causes
     //  problems
@@ -114,16 +150,11 @@ void Instruction::write(FILE* fd) {
         return;
     }
 
+    if(imds > 2) throw instruction_error("IMDS cannot be greater than 2");
+
     //make sure to write only what is actually relevent
-    bool wrote_dst = false;
-    if(route.first == Location::IMD || route.first == Location::PIMD) {
-        fwrite((void*)&imd_dst, 2, 1, fd);
-        wrote_dst = true;
-    }
-    if(route.second == Location::IMD || route.second == Location::PIMD) {
-        if(wrote_dst) fwrite((void*)&imd_src, 2, 1, fd);
-        else fwrite((void*)&imd_dst, 2, 1, fd);
-    }
+    if(imds > 0) fwrite((void*)&imd_dst, 2, 1, fd);
+    if(imds > 1) fwrite((void*)&imd_src, 2, 1, fd);
 }
 
 

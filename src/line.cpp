@@ -42,38 +42,12 @@ void Line::compile() {
 
 
     // set the arguments
-    ins.setRoute(LocationFromArg(dst), LocationFromArg(src));
-    bool set_dst_imd = false;
-    std::pair<Location, Location> route = ins.getRoute();
-    if(dst) {
-        ins.setDestMode(dst->mode);
-        switch(route.first) {
-        case Location::IMD:
-        case Location::PIMD:
-        case Location::RIMD:
-            ins.setImdDst(dst->val);
-            set_dst_imd = true;
-            break;
-        default:
-            break;
-            //Do nothing
-        }
-    }
-    if(src) {
-        ins.setSrcMode(src->mode);
-        switch(route.second) {
-        case Location::IMD:
-        case Location::PIMD:
-            if(set_dst_imd) ins.setImdSrc(src->val);
-            else ins.setImdDst(dst->val);
-            set_dst_imd = true;
-            break;
-        default:
-            break;
-            //Do nothing
-        }
-    }
+    std::pair<Location, Location> route(LocationFromArg(dst), LocationFromArg(src));
+    ins.setRoute(route.first, route.second);
+    ins.setImds(dst->val, src->val);
 
+    if(dst) ins.setDestMode(dst->mode);
+    if(src) ins.setSrcMode(src->mode);
 
     // set opcode and verfiy correcness of parameters for operator
     // TODO: allow auto interpretation of MOV or SWAP?

@@ -35,40 +35,47 @@ class ArgVal;
  * @see the language guide for specifics
  */
 struct Instruction {
+    /// Type of instruction
     InsType type;
+    /// Binary data of the instruction
     uint16_t data;
 
-    uint16_t imd_dst; //A ptr would take more space, so just store immediate
-    uint16_t imd_src; // value regardless of whether it is needed or not
+    /// Number of immediates being stored
+    uint8_t imds;
+    /// Destination immediate value
+    uint16_t imd_dst;
+    /// Source immediate value
+    uint16_t imd_src;
 
 
     Instruction(InsType type = InsType::DAT, uint32_t data = 0) :
-            type(type), data(data), imd_dst(0), imd_src(0) {}
+            type(type), data(data), imds(0), imd_dst(0), imd_src(0) {}
 
 
     void setOPCode(OPCode);
-    OPCode getOPCode();
+    OPCode getOPCode() const;
 
     void setDestMode(AccessMode);
     void setSrcMode(AccessMode);
-    AccessMode getDestMode();
-    AccessMode getSrcMode();
+    AccessMode getDestMode() const;
+    AccessMode getSrcMode() const;
 
     void setRoute(Location dst, Location src);
-    void setRout(ArgVal* dst, ArgVal* src);
-    std::pair<Location, Location> getRoute();
+    std::pair<Location, Location> getRoute() const;
 
     void setData(uint16_t);
 
     /**
      * Converts the int64_t in argval
      */
-    void setData(ArgVal*);
+    void setData(const ArgVal*);
 
-    void setImdDst(ArgVal*);
-    void setImdSrc(ArgVal*);
+    /// Checks route to decide if/what to set
+    void setImds(const ArgVal* dst, const ArgVal* src);
+    void setImdDst(const ArgVal*);
+    void setImdSrc(const ArgVal*);
 
-    void write(FILE*);
+    void write(FILE*) const;
 
 
     static uint8_t routeToBinary(Location dst, Location src);
