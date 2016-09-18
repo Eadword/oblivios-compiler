@@ -10,7 +10,7 @@ extern std::map<string, ArgVal*> macros;
 extern std::vector<Line*> lines;
 
 int main(int argc, char** argv) {
-    if(argc < 2) return 1;
+    if(argc < 3) { std::cerr<< "Correct usage: compile src_file out_file" << std::endl; return 1; }
     FILE* fd = fopen(argv[1], "r");
     if(!fd) {
         std::cout << "Could not open file." << std::endl;
@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
     }
 
     // actually compile the program
+    fd = fopen(argv[2], "w");
     for(uint32_t x = 0; x < lines.size(); ++x) {
         Line* line = lines[x];
 
@@ -61,6 +62,7 @@ int main(int argc, char** argv) {
         }
 
         // export the data to the binary file
+        line->ins.write(fd);
 
         // free up memory
         #ifdef DEBUG
@@ -68,6 +70,6 @@ int main(int argc, char** argv) {
         #endif
         delete line;
     }
-
+    fclose(fd);
     return 0;
 }

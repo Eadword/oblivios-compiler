@@ -99,6 +99,33 @@ void Instruction::setImdSrc(ArgVal* d) {
     imd_src = convertInt(d->getNum());
 }
 
+void Instruction::write(FILE* fd) {
+    //while it would be faster to just go through all of them in one call,
+    //  there is a potential of the class being changed in a way which causes
+    //  problems
+    fwrite((void*)&data, 2, 1, fd);
+
+    //don't need to do anything more
+    if(type == InsType::DAT) return;
+
+    std::pair<Location, Location> route = getRoute();
+    if(route.first == Location::RIMD) {
+        fwrite((void*)&imd_dst, 2, 1, fd);
+        return;
+    }
+
+    //make sure to write only what is actually relevent
+    bool wrote_dst = false;
+    if(route.first == Location::IMD || route.first == Location::PIMD) {
+        fwrite((void*)&imd_dst, 2, 1, fd);
+        wrote_dst = true;
+    }
+    if(route.second == Location::IMD || route.second == Location::PIMD) {
+        if(wrote_dst) fwrite((void*)&imd_src, 2, 1, fd);
+        else fwrite((void*)&imd_dst, 2, 1, fd);
+    }
+}
+
 
 
 uint8_t Instruction::routeToBinary(Location dst, Location src) {
