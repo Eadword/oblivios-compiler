@@ -86,20 +86,17 @@ void Instruction::setData(ArgVal* d) {
         setData((uint16_t)0);
         return;
     }
+    setData(convertInt(d->getNum()));
+}
 
-    int64_t val = d->getNum();
-    //This may seem stupid, but people can this way specifiy two's compliment on their own
-    // or specify a negitive to get an unsigned value. Ultimately it is about the context of
-    // where it is used that decides things
-    if(val > UINT16_MAX) {
-        std::cerr << "Truncating data with value: " << d << std::endl;
-        setData(UINT16_MAX);
-    } else if(val < INT16_MIN) {
-        std::cerr << "Truncating data with value: " << d << std::endl;
-        setData((uint16_t)INT16_MIN);
-    } else {
-        setData((uint16_t)val);
-    }
+void Instruction::setImdDst(ArgVal* d) {
+    if(!d || !d->isNum()) return;
+    imd_dst = convertInt(d->getNum());
+}
+
+void Instruction::setImdSrc(ArgVal* d) {
+    if(!d || !d->isNum()) return;
+    imd_src = convertInt(d->getNum());
 }
 
 
@@ -157,4 +154,19 @@ std::pair<Location, Location> Instruction::binaryToRoute(uint8_t binary) {
         throw instruction_error("Invalid route " + std::bitset<8>(binary).to_string());
 
     return dstsrc;
+}
+
+uint16_t Instruction::convertInt(int64_t d) {
+    //This may seem stupid, but people can this way specifiy two's compliment on their own
+    // or specify a negitive to get an unsigned value. Ultimately it is about the context of
+    // where it is used that decides things
+    if(d > UINT16_MAX) {
+        std::cerr << "Truncating data with value: " << d << std::endl;
+        return UINT16_MAX;
+    } else if(d < INT16_MIN) {
+        std::cerr << "Truncating data with value: " << d << std::endl;
+        return (uint16_t)INT16_MIN;
+    } else {
+        return (uint16_t)d;
+    }
 }

@@ -65,7 +65,11 @@ struct Instruction {
      */
     void setData(ArgVal*);
 
+    void setImdDst(ArgVal*);
+    void setImdSrc(ArgVal*);
+
 
     static uint8_t routeToBinary(Location dst, Location src);
     static std::pair<Location, Location> binaryToRoute(uint8_t binary);
+    static uint16_t convertInt(int64_t);
 };
