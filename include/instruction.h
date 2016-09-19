@@ -35,8 +35,6 @@ class ArgVal;
  * @see the language guide for specifics
  */
 struct Instruction {
-    //TODO: allow arg1 to be an immedate (can write to memory location of imd1)
-    //TODO: remove RIMD (no longer needed after above change)
     //TODO: allow for offsets (may not be possible)
 
     /// Type of instruction
@@ -59,12 +57,12 @@ struct Instruction {
     void setOPCode(OPCode);
     OPCode getOPCode() const;
 
-    void setDestMode(AccessMode);
-    void setSrcMode(AccessMode);
-    AccessMode getDestMode() const;
-    AccessMode getSrcMode() const;
+    void setArg1Mode(AccessMode);
+    void setArg2Mode(AccessMode);
+    AccessMode getArg1Mode() const;
+    AccessMode getArg2Mode() const;
 
-    void setRoute(Location dst, Location src);
+    void setRoute(Location arg1, Location arg2);
     std::pair<Location, Location> getRoute() const;
 
     void setData(uint16_t);
@@ -75,14 +73,14 @@ struct Instruction {
     void setData(const ArgVal*);
 
     /// Checks route to decide if/what to set
-    void setImds(const ArgVal* dst, const ArgVal* src);
+    void setImds(const ArgVal* arg1, const ArgVal* arg2);
     void setImd1(const ArgVal*);
     void setImd2(const ArgVal*);
 
     void write(FILE*) const;
 
 
-    static uint8_t routeToBinary(Location dst, Location src);
+    static uint8_t routeToBinary(Location arg1, Location arg2);
     static std::pair<Location, Location> binaryToRoute(uint8_t binary);
     static uint16_t convertInt(int64_t);
 };
