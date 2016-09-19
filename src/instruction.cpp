@@ -71,10 +71,10 @@ void Instruction::setRoute(Location dst, Location src) {
     //have to do this because it does checks
     std::pair<Location, Location> route = getRoute();
     dst = route.first; src = route.second;
-    //update argc
-    argc = 0;
-    if(dst == Location::RIMD || dst == Location::PIMD) ++argc;
-    if(src == Location::IMD || src == Location::PIMD) ++argc;
+    //update imd_count
+    imd_count = 0;
+    if(dst == Location::RIMD || dst == Location::PIMD) ++imd_count;
+    if(src == Location::IMD || src == Location::PIMD) ++imd_count;
 }
 
 std::pair<Location, Location> Instruction::getRoute() const {
@@ -107,7 +107,7 @@ void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
         switch(route.first) {
         case Location::RIMD:
         case Location::PIMD:
-            setImdDst(dst);
+            setImd1(dst);
             break;
         default:
             break;
@@ -118,8 +118,8 @@ void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
         switch(route.second) {
         case Location::IMD:
         case Location::PIMD:
-            if(argc < 2) setImdDst(src);
-            else setImdSrc(src);
+            if(imd_count < 2) setImd1(src);
+            else setImd2(src);
             break;
         default:
             break;
@@ -128,14 +128,14 @@ void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
     }
 }
 
-void Instruction::setImdDst(const ArgVal* d) {
+void Instruction::setImd1(const ArgVal* d) {
     if(!d || !d->isNum()) return;
-    imd_dst = convertInt(d->getNum());
+    imd1 = convertInt(d->getNum());
 }
 
-void Instruction::setImdSrc(const ArgVal* d) {
+void Instruction::setImd2(const ArgVal* d) {
     if(!d || !d->isNum()) return;
-    imd_src = convertInt(d->getNum());
+    imd2 = convertInt(d->getNum());
 }
 
 void Instruction::write(FILE* fd) const {
@@ -151,20 +151,20 @@ void Instruction::write(FILE* fd) const {
 
     std::pair<Location, Location> route = getRoute();
     if(route.first == Location::RIMD) {
-        t = boost::endian::native_to_big(imd_dst);
+        t = boost::endian::native_to_big(imd1);
         fwrite((void*)&t, 2, 1, fd);
         return;
     }
 
-    if(argc > 2) throw instruction_error("Arg count cannot be greater than 2");
+    if(imd_count > 2) throw instruction_error("Arg count cannot be greater than 2");
 
     //make sure to write only what is actually relevent
-    if(argc > 0) {
-        t = boost::endian::native_to_big(imd_dst);
+    if(imd_count > 0) {
+        t = boost::endian::native_to_big(imd1);
         fwrite((void*)&t, 2, 1, fd);
     }
-    if(argc > 1) {
-        t = boost::endian::native_to_big(imd_src);
+    if(imd_count > 1) {
+        t = boost::endian::native_to_big(imd2);
         fwrite((void*)&t, 2, 1, fd);
     }
 }

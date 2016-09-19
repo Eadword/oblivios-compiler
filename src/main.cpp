@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
             std::cerr << e.what() << " (" << *line << ")" << std::endl;
         }
         //two bytes for the instruction and two bytes for every immediate value
-        offset += line->ins.argc * 2 + 2;
+        offset += line->ins.imd_count * 2 + 2;
 
         // export the data to the binary file
         line->ins.write(fd);

@@ -35,7 +35,6 @@ class ArgVal;
  * @see the language guide for specifics
  */
 struct Instruction {
-    //TODO: change names to arg1, arg2 and imd1, imd2
     //TODO: allow arg1 to be an immedate (can write to memory location of imd1)
     //TODO: remove RIMD (no longer needed after above change)
     //TODO: allow for offsets (may not be possible)
@@ -46,15 +45,15 @@ struct Instruction {
     uint16_t data;
 
     /// Number of immediates being stored
-    uint8_t argc;
+    uint8_t imd_count;
     /// Destination immediate value
-    uint16_t imd_dst;
+    uint16_t imd1;
     /// Source immediate value
-    uint16_t imd_src;
+    uint16_t imd2;
 
 
     Instruction(InsType type = InsType::DAT, uint32_t data = 0) :
-            type(type), data(data), argc(0), imd_dst(0), imd_src(0) {}
+            type(type), data(data), imd_count(0), imd1(0), imd2(0) {}
 
 
     void setOPCode(OPCode);
@@ -77,8 +76,8 @@ struct Instruction {
 
     /// Checks route to decide if/what to set
     void setImds(const ArgVal* dst, const ArgVal* src);
-    void setImdDst(const ArgVal*);
-    void setImdSrc(const ArgVal*);
+    void setImd1(const ArgVal*);
+    void setImd2(const ArgVal*);
 
     void write(FILE*) const;
 
