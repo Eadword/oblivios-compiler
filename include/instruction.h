@@ -48,13 +48,13 @@ struct Instruction {
     /// Number of immediates being stored
     uint8_t argc;
     /// Destination immediate value
-    uint16_t imd_dst;
+    uint16_t arg1;
     /// Source immediate value
-    uint16_t imd_src;
+    uint16_t arg2;
 
 
     Instruction(InsType type = InsType::DAT, uint32_t data = 0) :
-            type(type), data(data), argc(0), imd_dst(0), imd_src(0) {}
+            type(type), data(data), argc(0), arg1(0), arg2(0) {}
 
 
     void setOPCode(OPCode);
