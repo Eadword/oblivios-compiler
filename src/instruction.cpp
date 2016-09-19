@@ -130,12 +130,12 @@ void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
 
 void Instruction::setImdDst(const ArgVal* d) {
     if(!d || !d->isNum()) return;
-    arg1 = convertInt(d->getNum());
+    imd_dst = convertInt(d->getNum());
 }
 
 void Instruction::setImdSrc(const ArgVal* d) {
     if(!d || !d->isNum()) return;
-    arg2 = convertInt(d->getNum());
+    imd_src = convertInt(d->getNum());
 }
 
 void Instruction::write(FILE* fd) const {
@@ -151,7 +151,7 @@ void Instruction::write(FILE* fd) const {
 
     std::pair<Location, Location> route = getRoute();
     if(route.first == Location::RIMD) {
-        t = boost::endian::native_to_big(arg1);
+        t = boost::endian::native_to_big(imd_dst);
         fwrite((void*)&t, 2, 1, fd);
         return;
     }
@@ -160,11 +160,11 @@ void Instruction::write(FILE* fd) const {
 
     //make sure to write only what is actually relevent
     if(argc > 0) {
-        t = boost::endian::native_to_big(arg1);
+        t = boost::endian::native_to_big(imd_dst);
         fwrite((void*)&t, 2, 1, fd);
     }
     if(argc > 1) {
-        t = boost::endian::native_to_big(arg2);
+        t = boost::endian::native_to_big(imd_src);
         fwrite((void*)&t, 2, 1, fd);
     }
 }
