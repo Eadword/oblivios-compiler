@@ -10,9 +10,8 @@ extern std::map<string, ArgVal*> macros;
 extern std::vector<Line*> lines;
 
 int main(int argc, char** argv) {
-    //if(argc < 3) { std::cerr<< "Correct usage: compile src_file out_file" << std::endl; return 1; }
-    //FILE* fd = fopen(argv[1], "r");
-    FILE* fd = fopen("../data/test_input", "r");
+    if(argc < 3) { std::cerr<< "Correct usage: compile src_file out_file" << std::endl; return 1; }
+    FILE* fd = fopen(argv[1], "r");
     if(!fd) {
         std::cout << "Could not open file." << std::endl;
         return -1;
@@ -30,32 +29,28 @@ int main(int argc, char** argv) {
         delete macro.second;
     }
 
-    std::map<string, uint32_t> labels;
-    // create list of all labels and what true line they point to
-    for(uint32_t x = 0; x < lines.size(); ++x) {
-        const Labels* lbls = lines[x]->labels;
-        if(!lbls) continue;
-
-        for(Labels::iterator lbl = lbls->begin(); lbl != lbls->end(); ++lbl) {
-            if(labels.find(*lbl) != labels.end())
-                std::cerr << "Multiple definitions of label: "  << *lbl << std::endl;
-            else
-                labels[*lbl] = x;
-        }
-    }
-
     // actually compile the program
-    //fd = fopen(argv[2], "w");
-    fd = fopen("out", "w");
-    //TODO: the offsets should not be per 16bits, but rather per 8bits
+    fd = fopen(argv[2], "w");
+    //TODO: allow a label + offset for things which are part way though a line (and other reasons)
+    std::map<string, uint32_t> labels;
     uint32_t offset = 0; // additional offset to account for immediates
     for(uint32_t x = 0; x < lines.size(); ++x) {
         Line* line = lines[x];
+        const Labels* lbls = lines[x]->labels;
+
+        // create list of all labels and what byte they point to
+        if(lbls) {
+            for(Labels::iterator lbl = lbls->begin(); lbl != lbls->end(); ++lbl) {
+                if(labels.find(*lbl) != labels.end())
+                    std::cerr << "Multiple definitions of label: "  << *lbl << std::endl;
+                else
+                    labels[*lbl] = offset;
+            }
+        }
 
         // convert labels to offsets
-        applyLabels(line->dst, labels, x + offset);
-        applyLabels(line->src, labels, x + offset);
-        offset += line->ins.imds;
+        applyLabels(line->dst, labels, offset);
+        applyLabels(line->src, labels, offset);
 
         // convert to binary
         try {
@@ -65,6 +60,8 @@ int main(int argc, char** argv) {
         } catch(instruction_error& e) {
             std::cerr << e.what() << " (" << *line << ")" << std::endl;
         }
+        //two bytes for the instruction and two bytes for every immediate value
+        offset += line->ins.imds * 2 + 2;
 
         // export the data to the binary file
         line->ins.write(fd);

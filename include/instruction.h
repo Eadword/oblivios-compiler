@@ -35,6 +35,10 @@ class ArgVal;
  * @see the language guide for specifics
  */
 struct Instruction {
+    //TODO: change names to arg1, arg2 and imd1, imd2
+    //TODO: allow arg1 to be an immedate (can write to memory location of imd1)
+    //TODO: remove RIMD (no longer needed after above change)
+
     /// Type of instruction
     InsType type;
     /// Binary data of the instruction

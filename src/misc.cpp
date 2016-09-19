@@ -19,10 +19,8 @@ void applyLabels(Argument* arg, const std::map<string, uint32_t>& labels, uint32
         return; // do nothing, it is not a label
     }
 
-    if(arg->pointer) std::cerr << "Labels should not be pointers: (" << *arg << ")" << std::endl;
     delete arg->val; // replace the arg
     arg->val = new ArgVal(static_cast<int64_t>(lbl_loc) - static_cast<int64_t>(cur_loc));
-    arg->mode = AccessMode::RELATIVE; //labels should always be relative to IP
 }
 
 #ifdef DEBUG
