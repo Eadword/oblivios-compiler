@@ -5,7 +5,6 @@
 
 class Argument;
 
-//TODO: use namespace?
 enum class Location : uint8_t {
     #define X(name, str, dstval, srcval) name
     #include "locations"

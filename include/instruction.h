@@ -38,6 +38,7 @@ struct Instruction {
     //TODO: change names to arg1, arg2 and imd1, imd2
     //TODO: allow arg1 to be an immedate (can write to memory location of imd1)
     //TODO: remove RIMD (no longer needed after above change)
+    //TODO: allow for offsets (may not be possible)
 
     /// Type of instruction
     InsType type;
@@ -45,7 +46,7 @@ struct Instruction {
     uint16_t data;
 
     /// Number of immediates being stored
-    uint8_t imds;
+    uint8_t argc;
     /// Destination immediate value
     uint16_t imd_dst;
     /// Source immediate value
@@ -53,7 +54,7 @@ struct Instruction {
 
 
     Instruction(InsType type = InsType::DAT, uint32_t data = 0) :
-            type(type), data(data), imds(0), imd_dst(0), imd_src(0) {}
+            type(type), data(data), argc(0), imd_dst(0), imd_src(0) {}
 
 
     void setOPCode(OPCode);

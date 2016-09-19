@@ -71,10 +71,10 @@ void Instruction::setRoute(Location dst, Location src) {
     //have to do this because it does checks
     std::pair<Location, Location> route = getRoute();
     dst = route.first; src = route.second;
-    //update imds
-    imds = 0;
-    if(dst == Location::RIMD || dst == Location::PIMD) ++imds;
-    if(src == Location::IMD || src == Location::PIMD) ++imds;
+    //update argc
+    argc = 0;
+    if(dst == Location::RIMD || dst == Location::PIMD) ++argc;
+    if(src == Location::IMD || src == Location::PIMD) ++argc;
 }
 
 std::pair<Location, Location> Instruction::getRoute() const {
@@ -118,7 +118,7 @@ void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
         switch(route.second) {
         case Location::IMD:
         case Location::PIMD:
-            if(imds < 2) setImdDst(src);
+            if(argc < 2) setImdDst(src);
             else setImdSrc(src);
             break;
         default:
@@ -156,14 +156,14 @@ void Instruction::write(FILE* fd) const {
         return;
     }
 
-    if(imds > 2) throw instruction_error("IMDS cannot be greater than 2");
+    if(argc > 2) throw instruction_error("Arg count cannot be greater than 2");
 
     //make sure to write only what is actually relevent
-    if(imds > 0) {
+    if(argc > 0) {
         t = boost::endian::native_to_big(imd_dst);
         fwrite((void*)&t, 2, 1, fd);
     }
-    if(imds > 1) {
+    if(argc > 1) {
         t = boost::endian::native_to_big(imd_src);
         fwrite((void*)&t, 2, 1, fd);
     }

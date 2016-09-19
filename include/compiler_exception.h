@@ -1,7 +1,5 @@
 #pragma once
 
-//TODO: decide whether to keep this, generated C code makes this less useful
-
 #include <exception>
 #include <string>
 #include <stdexcept>
