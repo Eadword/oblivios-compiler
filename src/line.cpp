@@ -42,8 +42,8 @@ void Line::compile() {
 
 
     // set the arguments
-    std::pair<Location, Location> route(LocationFromArg(dst), LocationFromArg(src));
-    ins.setRoute(route.first, route.second);
+    ins.setRoute(LocationFromArg(dst), LocationFromArg(src));
+    std::pair<Location, Location> route = ins.getRoute();
     ins.setImds(dst ? dst->val : nullptr, src ? src->val : nullptr);
 
     if(dst) ins.setDestMode(dst->mode);

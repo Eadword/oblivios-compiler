@@ -69,6 +69,9 @@ void Instruction::setRoute(Location dst, Location src) {
     data &= 0xFF00; //1111 1111 0000 0000
     data |= (uint16_t)routeToBinary(dst, src);
 
+    //have to do this because it does checks
+    std::pair<Location, Location> route = getRoute();
+    dst = route.first; src = route.second;
     //update imds
     imds = 0;
     if(dst == Location::RIMD || dst == Location::PIMD) ++imds;
