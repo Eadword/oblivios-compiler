@@ -5,9 +5,11 @@
  #macro3      AX ;doubt this is useful info
 #macro4 macro1; Can't think of more garbage than this...
 
-label1:   movw ax, macro1
-datalbl:        DAT 0x00000000
-add macro3, bx
-movw bx, datalbl
+								; op   dst,src || opcode md rout e... || he x.
+								;================================================
+label1:   movw ax, macro1		; movw ax, -34 || 000010 00 1010 0110 || 08 A6 FF DE
+datalbl:        DAT 0x00000000	; dat 0		   || 0000 0000 0000 0000 || 00 00
+add macro3, bx					; add ax, bx   || 000111 00 0111 0110 || 1C 76
+movw bx, datalbl				; movw bx, %-2 || 000010 01 1010 0111 || 09 A7 FF FE
 label2: label3:
-jmp label1
+jmp label1						; jmp %-6      || 010111 10 1111 1111 || 5E FF FF FA

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <regex>
 
+#include <boost/endian/conversion.hpp>
+
 #include "instruction.h"
 #include "parser.h"
 #include "patterns.h"
@@ -69,7 +71,7 @@ void Instruction::setRoute(Location dst, Location src) {
 
     //update imds
     imds = 0;
-    if(dst == Location::IMD || dst == Location::PIMD || dst == Location::RIMD) ++imds;
+    if(dst == Location::RIMD || dst == Location::PIMD) ++imds;
     if(src == Location::IMD || src == Location::PIMD) ++imds;
 }
 
@@ -101,9 +103,8 @@ void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
 
     if(dst) {
         switch(route.first) {
-        case Location::IMD:
-        case Location::PIMD:
         case Location::RIMD:
+        case Location::PIMD:
             setImdDst(dst);
             break;
         default:
@@ -115,8 +116,8 @@ void Instruction::setImds(const ArgVal* dst, const ArgVal* src) {
         switch(route.second) {
         case Location::IMD:
         case Location::PIMD:
-            if(imds > 0) setImdSrc(src);
-            else setImdDst(src);
+            if(imds < 2) setImdDst(src);
+            else setImdSrc(src);
             break;
         default:
             break;
@@ -139,22 +140,31 @@ void Instruction::write(FILE* fd) const {
     //while it would be faster to just go through all of them in one call,
     //  there is a potential of the class being changed in a way which causes
     //  problems
-    fwrite((void*)&data, 2, 1, fd);
+
+    uint16_t t = boost::endian::native_to_big(data);
+    fwrite((void*)&t, 2, 1, fd);
 
     //don't need to do anything more
     if(type == InsType::DAT) return;
 
     std::pair<Location, Location> route = getRoute();
     if(route.first == Location::RIMD) {
-        fwrite((void*)&imd_dst, 2, 1, fd);
+        t = boost::endian::native_to_big(imd_dst);
+        fwrite((void*)&t, 2, 1, fd);
         return;
     }
 
     if(imds > 2) throw instruction_error("IMDS cannot be greater than 2");
 
     //make sure to write only what is actually relevent
-    if(imds > 0) fwrite((void*)&imd_dst, 2, 1, fd);
-    if(imds > 1) fwrite((void*)&imd_src, 2, 1, fd);
+    if(imds > 0) {
+        t = boost::endian::native_to_big(imd_dst);
+        fwrite((void*)&t, 2, 1, fd);
+    }
+    if(imds > 1) {
+        t = boost::endian::native_to_big(imd_src);
+        fwrite((void*)&t, 2, 1, fd);
+    }
 }
 
 

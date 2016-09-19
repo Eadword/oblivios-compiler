@@ -10,8 +10,9 @@ extern std::map<string, ArgVal*> macros;
 extern std::vector<Line*> lines;
 
 int main(int argc, char** argv) {
-    if(argc < 3) { std::cerr<< "Correct usage: compile src_file out_file" << std::endl; return 1; }
-    FILE* fd = fopen(argv[1], "r");
+    //if(argc < 3) { std::cerr<< "Correct usage: compile src_file out_file" << std::endl; return 1; }
+    //FILE* fd = fopen(argv[1], "r");
+    FILE* fd = fopen("../data/test_input", "r");
     if(!fd) {
         std::cout << "Could not open file." << std::endl;
         return -1;
@@ -44,7 +45,9 @@ int main(int argc, char** argv) {
     }
 
     // actually compile the program
-    fd = fopen(argv[2], "w");
+    //fd = fopen(argv[2], "w");
+    fd = fopen("out", "w");
+    //TODO: the offsets should not be per 16bits, but rather per 8bits
     uint32_t offset = 0; // additional offset to account for immediates
     for(uint32_t x = 0; x < lines.size(); ++x) {
         Line* line = lines[x];
