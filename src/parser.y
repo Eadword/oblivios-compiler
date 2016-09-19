@@ -10,6 +10,7 @@
     std::vector<Line*> lines;
 
     int yylex(void);
+    //TODO: standardize error handling
     void yyerror(const char*);
     void yywarn(const char*);
 

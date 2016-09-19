@@ -5,7 +5,6 @@
 
 #include "instruction.h"
 #include "parser.h"
-#include "patterns.h"
 
 void Instruction::setOPCode(OPCode code) {
     if(type == InsType::DAT)
