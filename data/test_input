@@ -12,5 +12,5 @@ datalbl:        DAT 0x00000000	; dat 0		    || 0000 0000 0000 0000 || 00 00
 add macro3, bx					; add ax, bx    || 001000 00 0111 0110 || 20 76
 movw bx, %[datalbl]				; movw bx,%[-4] || 000011 01 1110 0111 || 0D E7 FF FC
 label2: label3:
-jmp %label1						; jmp %-12      || 011000 10 0000 1001 || 62 09 FF F4
+jmp label1						; jmp -12       || 011000 00 0000 1001 || 60 09 FF F4
 inc %[datalbl]					; inc %[-12]    || 010101 10 0000 1101 || 56 0D FF F4
