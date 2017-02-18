@@ -50,7 +50,6 @@ void Line::compile() {
     if(src) ins.setArg2Mode(src->mode);
 
     // set opcode and verfiy correcness of parameters for operator
-    // TODO: allow auto interpretation of MOV or SWAP?
     uint8_t expected_params = getOPCodeParams(opcode);
     const char* incorrect_params = "Incorrect number of parameters for operator";
     if(expected_params == 2) {

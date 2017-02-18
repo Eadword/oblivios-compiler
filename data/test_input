@@ -5,12 +5,12 @@
  #macro3      AX ;doubt this is useful info
 #macro4 macro1; Can't think of more garbage than this...
 
-								; op   arg1,arg2|| opcode md arg2 arg1 || he x.
+								; op arg1, arg2 || opcode md arg2 arg1 || hex
 								;====================================================
-label1:   movw ax, macro1		; movw ax, -34  || 000011 00 1010 0110 || 0C A6 FF DE
+label1:   mov ax, macro1		; mov ax, -34   || 000010 00 1010 0110 || 08 A6 FF DE
 datalbl:        DAT 0x00000000	; dat 0		    || 0000 0000 0000 0000 || 00 00
-add macro3, bx					; add ax, bx    || 001000 00 0111 0110 || 20 76
-movw bx, %[datalbl]				; movw bx,%[-4] || 000011 01 1110 0111 || 0D E7 FF FC
+add macro3, bx					; add ax, bx    || 000100 00 0111 0110 || 10 76
+mov bx, %[datalbl]				; mov bx,%[-4]  || 000010 01 1110 0111 || 09 E7 FF FC
 label2: label3:
-jmp label1						; jmp -12       || 011000 00 0000 1001 || 60 09 FF F4
-inc %[datalbl]					; inc %[-12]    || 010101 10 0000 1101 || 56 0D FF F4
+jmp label1						; jmp -12       || 010100 00 0000 1001 || 50 09 FF F4
+inc %[datalbl]					; inc %[-12]    || 010001 10 0000 1101 || 46 0D FF F4
